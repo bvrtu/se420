@@ -9,11 +9,14 @@ env/
 ENV/
 
 # Data
-data/raw/
-data/processed/
-data/embeddings/
-data/vector_db/
+# data/ klasörü artık GitHub'a eklenecek
+# data/raw/
+# data/processed/
+# data/embeddings/
+# data/vector_db/
 *.json
+!data/**/*.json  # data/ klasöründeki JSON dosyalarını ekle
+!data/**/*.json  # data/ klasöründeki JSON dosyalarını ekle
 
 # IDE
 .idea/
