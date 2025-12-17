@@ -25,6 +25,23 @@ class IUECourseScraper:
     
     BASE_URL = "https://ects.ieu.edu.tr/new"
     
+    @staticmethod
+    def normalize_course_code(course_code: str) -> str:
+        """
+        Normalize course code (Görsel: SE 115 / SE115 → retrieval zinciri kırılmasın)
+        
+        Args:
+            course_code: Raw course code (e.g., "SE 115", "SE115", "se 115")
+            
+        Returns:
+            Normalized course code (e.g., "SE115" - uppercase, no spaces)
+        """
+        if not course_code:
+            return ""
+        # Görsel: Course code'u her zaman normalize et (SE 115 / SE115)
+        normalized = course_code.replace(' ', '').upper().strip()
+        return normalized
+    
     # Department configurations
     DEPARTMENTS = {
         "software_engineering": {
@@ -111,7 +128,8 @@ class IUECourseScraper:
                     for row in rows:
                         lang_links = row.find_all('a', href=re.compile(r'syllabus\.php'))
                         for link in lang_links:
-                            code = link.get_text(strip=True)
+                            raw_code = link.get_text(strip=True)
+                            code = self.normalize_course_code(raw_code)  # Görsel: Normalize
                             if any(code.startswith(prefix) for prefix in lang_prefixes):
                                 name = ""
                                 cells = row.find_all(['td', 'th'])
@@ -127,7 +145,7 @@ class IUECourseScraper:
                                 
                                 if not any(c['course_code'] == code for c in nested_courses):
                                     nested_courses.append({
-                                        'course_code': code,
+                                        'course_code': self.normalize_course_code(code),  # Görsel: Normalize
                                         'course_name': name,
                                         'detail_url': href
                                     })
@@ -136,7 +154,8 @@ class IUECourseScraper:
                 for div in detail_soup.find_all(['div', 'ul', 'ol']):
                     lang_links = div.find_all('a', href=re.compile(r'syllabus\.php'))
                     for link in lang_links:
-                        code = link.get_text(strip=True)
+                        raw_code = link.get_text(strip=True)
+                        code = self.normalize_course_code(raw_code)  # Görsel: Normalize
                         if any(code.startswith(prefix) for prefix in lang_prefixes):
                             # Try to get name from parent element
                             name = ""
@@ -153,7 +172,7 @@ class IUECourseScraper:
                             
                             if not any(c['course_code'] == code for c in nested_courses):
                                 nested_courses.append({
-                                    'course_code': code,
+                                    'course_code': self.normalize_course_code(code),  # Görsel: Normalize
                                     'course_name': name,
                                     'detail_url': href
                                 })
@@ -225,14 +244,16 @@ class IUECourseScraper:
                 # Get the language course number from pattern
                 lang_num = lang_course_numbers.get(lang_code, sfl_number)
                 # Construct course code: e.g., "FR 201" or "FR 103" for SFL 1013
-                lang_course_code = f"{lang_code} {lang_num}"
+                raw_lang_course_code = f"{lang_code} {lang_num}"
+                lang_course_code = self.normalize_course_code(raw_lang_course_code)  # Görsel: Normalize
                 
                 # Try to find this course in curriculum first
                 found_in_curriculum = False
                 for link in soup.find_all('a', href=re.compile(r'syllabus\.php')):
-                    code = link.get_text(strip=True)
+                    raw_code = link.get_text(strip=True)
+                    code = self.normalize_course_code(raw_code)  # Görsel: Normalize
                     # Match with flexible spacing
-                    if code.upper().replace(' ', '') == lang_course_code.upper().replace(' ', ''):
+                    if code == lang_course_code:  # Görsel: Normalize edilmiş, direkt karşılaştır
                         parent_row = link.find_parent('tr')
                         name = ""
                         if parent_row:
@@ -248,7 +269,7 @@ class IUECourseScraper:
                             href = urljoin(self.BASE_URL, href)
                         
                         nested_courses.append({
-                            'course_code': code,
+                            'course_code': code,  # Görsel: Normalize edilmiş
                             'course_name': name,
                             'detail_url': href
                         })
@@ -268,7 +289,7 @@ class IUECourseScraper:
                     if lang_detail and lang_detail.get('course_name'):
                         # Use the full scraped detail information
                         nested_courses.append({
-                            'course_code': lang_course_code,
+                            'course_code': lang_course_code,  # Görsel: Zaten normalize edilmiş
                             'course_name': lang_detail.get('course_name', ''),
                             'detail_url': lang_course_url,
                             'objectives': lang_detail.get('objectives', ''),
@@ -304,7 +325,8 @@ class IUECourseScraper:
         Checks for pool links (akademik.php?sid=pool) and extracts from those pages
         """
         nested_courses = []
-        course_code = link.get_text(strip=True)
+        raw_course_code = link.get_text(strip=True)
+        course_code = self.normalize_course_code(raw_course_code)  # Görsel: Normalize
         
         # Check if this is a POOL link (not a syllabus link)
         href = link.get('href', '')
@@ -348,7 +370,7 @@ class IUECourseScraper:
                                             pass
                             
                             nested_courses.append({
-                                'course_code': code,
+                                'course_code': self.normalize_course_code(code),  # Görsel: Normalize
                                 'course_name': name,
                                 'detail_url': nested_href,
                                 'ects': ects
@@ -382,7 +404,8 @@ class IUECourseScraper:
         
         for link in course_links:
             try:
-                course_code = link.text.strip()
+                raw_course_code = link.text.strip()
+                course_code = self.normalize_course_code(raw_course_code)  # Görsel: Normalize
                 
                 # Skip if already seen (for non-SFL/ELEC/POOL courses)
                 if not (course_code.startswith('SFL') or course_code.startswith('ELEC') or course_code.startswith('POOL')):
@@ -415,7 +438,7 @@ class IUECourseScraper:
                     semester_info = self._extract_semester_info(parent_row)
                     
                     course_data = {
-                        'course_code': course_code,
+                        'course_code': self.normalize_course_code(course_code),  # Görsel: Normalize
                         'course_name': course_name,
                         'detail_url': course_url,
                         'semester': semester_info.get('semester'),
@@ -495,14 +518,15 @@ class IUECourseScraper:
         elec_parent_courses = {}
         elec_links = soup.find_all('a', href=re.compile(r'syllabus\.php'))
         for link in elec_links:
-            code = link.get_text(strip=True)
+            raw_code = link.get_text(strip=True)
+            code = self.normalize_course_code(raw_code)  # Görsel: Normalize
             if code.startswith('ELEC'):
                 # This is an ELEC parent course
                 parent_row = link.find_parent('tr')
                 semester_info = self._extract_semester_info(parent_row) if parent_row else {}
                 
                 elec_parent_courses[code] = {
-                    'course_code': code,
+                    'course_code': code,  # Görsel: Normalize edilmiş
                     'course_name': 'Elective Course',
                     'detail_url': '',
                     'semester': semester_info.get('semester'),
@@ -516,9 +540,10 @@ class IUECourseScraper:
         # If no ELEC parents found in curriculum, create them based on elec_count
         if not elec_parent_courses and elec_count:
             for i in range(1, elec_count + 1):
-                elec_code = f"ELEC {str(i).zfill(3)}"
+                raw_elec_code = f"ELEC {str(i).zfill(3)}"
+                elec_code = self.normalize_course_code(raw_elec_code)  # Görsel: Normalize
                 elec_parent_courses[elec_code] = {
-                    'course_code': elec_code,
+                    'course_code': elec_code,  # Görsel: Normalize edilmiş
                     'course_name': 'Elective Course',
                     'detail_url': '',
                     'semester': None,  # Will be determined from nested courses
@@ -784,8 +809,11 @@ class IUECourseScraper:
                         if app_text.isdigit():
                             app_hours = int(app_text)
                     
+                    # Görsel: Course code normalization
+                    normalized_code = self.normalize_course_code(code)
+                    
                     elective_courses.append({
-                        'course_code': code,
+                        'course_code': normalized_code,  # Görsel: Normalize edilmiş
                         'course_name': name,
                         'detail_url': href,
                         'type': 'Elective',
@@ -1090,8 +1118,11 @@ class IUECourseScraper:
                                 logger.debug(f"Skipping {code} - semester mismatch: pool={pool_semester}, course={course_semester}")
                                 continue
                     
+                    # Görsel: Course code normalization
+                    normalized_code = self.normalize_course_code(code)
+                    
                     nested_course = {
-                        'course_code': code,
+                        'course_code': normalized_code,  # Görsel: Normalize edilmiş
                         'course_name': name,
                         'detail_url': href,
                         'ects': ects,
@@ -1113,8 +1144,8 @@ class IUECourseScraper:
                             'semester': course_detail.get('semester', '')
                         })
                     
-                    # Check for duplicates before adding
-                    if not any(c.get('course_code') == code for c in nested_courses):
+                    # Check for duplicates before adding (normalized code ile)
+                    if not any(c.get('course_code') == normalized_code for c in nested_courses):
                         nested_courses.append(nested_course)
         
         # Get minimum ECTS requirement
@@ -1122,8 +1153,11 @@ class IUECourseScraper:
         if dept_key and dept_key in min_ects_requirements:
             min_ects = min_ects_requirements[dept_key].get(pool_code)
         
+        # Görsel: Course code normalization
+        normalized_pool_code = self.normalize_course_code(pool_code) if pool_code else ''
+        
         return {
-            'course_code': pool_code,
+            'course_code': normalized_pool_code,  # Görsel: Normalize edilmiş
             'course_name': pool_name,
             'detail_url': '',  # POOL courses don't have detail pages
             'type': 'Pool',
@@ -1216,7 +1250,7 @@ class IUECourseScraper:
             return {}
         
         course_detail = {
-            'course_code': course_code,
+            'course_code': self.normalize_course_code(course_code),  # Görsel: Normalize
             'course_name': '',
             'objectives': '',
             'description': '',
@@ -1953,7 +1987,9 @@ class IUECourseScraper:
         # Scrape details for each course
         all_courses = []
         for i, course in enumerate(courses, 1):
-            course_code = course['course_code']
+            raw_course_code = course.get('course_code', '')
+            course_code = self.normalize_course_code(raw_course_code)  # Görsel: Normalize
+            course['course_code'] = course_code  # Update in course dict
             
             # SFL courses are the same across all departments - skip if already scraped
             if course_code.startswith('SFL'):

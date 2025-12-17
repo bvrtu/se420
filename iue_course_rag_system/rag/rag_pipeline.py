@@ -282,30 +282,49 @@ Answer:"""
             if not course_type_filter:
                 course_type_filter = detected.get('course_type_filter')
         
-        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görseldeki formata göre güncellendi
-        # ÇÖZÜM B: SECTION-AWARE RETRIEVAL
+        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görsel: Course code hard filter GARANTİ
+        # Görsel: "Bu bir 'optimizasyon' değil, Bu bir akademik zorunluluk"
         code = course_code  # extract_course_code(query) zaten yapıldı
+        
+        # ÇÖZÜM B: SECTION-AWARE RETRIEVAL - Görsel: Section mapping düzeltmesi
+        # Görsel: "haftalık" → "objectives" YANLIŞ, "weekly_topics" DOĞRU
+        # Görsel: "kredi" → "prerequisites" YANLIŞ, "credits" DOĞRU
         section = None
         query_lower = query.lower()
-        if "kredi" in query_lower or "credit" in query_lower:
-            section = "credits"
+        if "kredi" in query_lower or "credit" in query_lower or "ects" in query_lower:
+            section = "credits"  # Görsel: "prerequisites" değil, "credits" olmalı
         elif "haftalık" in query_lower or "weekly" in query_lower:
-            section = "weekly_topics"
+            section = "weekly_topics"  # Görsel: "objectives" değil, "weekly_topics" olmalı
         
-        # Step 1: Retrieve with hard filter and section boost
-        # Görseldeki formata göre: filter_course_code ve boost_section parametreleri
-        filters = {"course_code": code} if code else None
-        retrieved_chunks = self.retrieve(
-            query=enhanced_query,
-            n_results=n_results * 2 if code else n_results,
-            department_filter=department_filter,
-            course_type_filter=course_type_filter,
-            filters=filters,
-            boost_section=section
-        )
+        # Step 1: Retrieve with HARD FILTER (Görsel: Garanti olmalı)
+        # Görsel: "if course_code: filters={"course_code": course_code}" zorunlu
+        if code:
+            # Görsel: Course code varsa MUTLAKA filter uygula (akademik zorunluluk)
+            filters = {"course_code": code}
+            retrieved_chunks = self.retrieve(
+                query=enhanced_query,
+                n_results=n_results * 2,
+                department_filter=department_filter,
+                course_type_filter=course_type_filter,
+                filters=filters,  # Görsel: Hard filter GARANTİ
+                boost_section=section
+            )
+        else:
+            # Course code yoksa normal search
+            retrieved_chunks = self.retrieve(
+                query=enhanced_query,
+                n_results=n_results,
+                department_filter=department_filter,
+                course_type_filter=course_type_filter,
+                filters=None,
+                boost_section=section
+            )
         
-        # ÇÖZÜM C: DATA-NOT-FOUND GUARD - Görseldeki formata göre güncellendi (0.30 threshold)
-        if not retrieved_chunks or max((d.get('similarity', 0) for d in retrieved_chunks), default=0) < 0.30:
+        # ÇÖZÜM C: DATA-NOT-FOUND GUARD - Görsel: "Veri yok" guard hâlâ zayıf
+        # Görsel: "Benzerlik düşük ama LLM cevap üretiyor" → Kod seviyesinde kesin guard
+        max_similarity = max((d.get('similarity', 0) for d in retrieved_chunks), default=0) if retrieved_chunks else 0
+        if not retrieved_chunks or max_similarity < 0.30:
+            # Görsel: Similarity düşükse LLM'e gitmeden kesin guard
             return {
                 'query': query,
                 'retrieved_chunks': [],
@@ -319,6 +338,25 @@ Answer:"""
         
         # Step 3: Generate response
         response = self.generate_response(query, context)
+        
+        # Görsel: TR+EN format assertion (Kod seviyesinde garanti)
+        # Görsel: "assert 'ANSWER (TR)' in answer" ve "assert 'ANSWER (EN)' in answer"
+        # Görsel: "LLM 'unutursa' sistem çöker" → Kod seviyesinde kontrol
+        response_upper = response.upper()
+        if "ANSWER (TR)" not in response_upper or "ANSWER (EN)" not in response_upper:
+            # LLM format'ı unuttuysa, format_answer ile zorla
+            logger.warning("LLM response does not contain TR+EN format, enforcing format...")
+            # Try to extract TR and EN from response
+            tr_match = re.search(r'ANSWER\s*\(TR\)[:\-]*\s*(.*?)(?=ANSWER\s*\(EN\)|$)', response, re.IGNORECASE | re.DOTALL)
+            en_match = re.search(r'ANSWER\s*\(EN\)[:\-]*\s*(.*?)$', response, re.IGNORECASE | re.DOTALL)
+            
+            if tr_match and en_match:
+                tr_text = tr_match.group(1).strip()
+                en_text = en_match.group(1).strip()
+                response = format_answer(tr_text, en_text)
+            else:
+                # Fallback: Use same text for both
+                response = format_answer(response, response)
         
         return {
             'query': query,

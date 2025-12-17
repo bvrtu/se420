@@ -88,7 +88,7 @@ class CourseEmbedder:
     
     def embed_chunks(self, chunks: List[Dict], batch_size: int = 32) -> List[Dict]:
         """
-        Generate embeddings for all chunks
+        Generate embeddings for all chunks (Görsel: Chunk uzunluğu kontrolü çok önemli)
         
         Args:
             chunks: List of chunk dictionaries with 'text' field
@@ -99,8 +99,26 @@ class CourseEmbedder:
         """
         logger.info(f"Generating embeddings for {len(chunks)} chunks...")
         
+        # Görsel: Chunk uzunluğu kontrolü (700-1000 token → embedding bulanıklaşır)
+        # Görsel: MAX_CHUNK_SIZE = 500 gibi bir sınır öneririm
+        processed_chunks = []
+        for chunk in chunks:
+            text = chunk.get('text', '')
+            # Görsel: Uzun chunk'ları split et (embedding quality için)
+            if len(text) > MAX_CHUNK_SIZE:
+                logger.warning(f"Chunk too long ({len(text)} chars), splitting...")
+                split_texts = self.split_text(text)
+                # Her split için ayrı chunk oluştur
+                for i, split_text in enumerate(split_texts):
+                    chunk_copy = chunk.copy()
+                    chunk_copy['text'] = split_text
+                    chunk_copy['chunk_index'] = chunk.get('chunk_index', 0) * 1000 + i  # Sub-index
+                    processed_chunks.append(chunk_copy)
+            else:
+                processed_chunks.append(chunk)
+        
         # Extract texts
-        texts = [chunk.get('text', '') for chunk in chunks]
+        texts = [chunk.get('text', '') for chunk in processed_chunks]
         
         # Generate embeddings in batches
         all_embeddings = []
@@ -119,12 +137,12 @@ class CourseEmbedder:
         
         # Add embeddings to chunks
         embedded_chunks = []
-        for chunk, embedding in zip(chunks, all_embeddings):
+        for chunk, embedding in zip(processed_chunks, all_embeddings):
             chunk_copy = chunk.copy()
             chunk_copy['embedding'] = embedding
             embedded_chunks.append(chunk_copy)
         
-        logger.info(f"Embeddings generated for {len(embedded_chunks)} chunks")
+        logger.info(f"Embeddings generated for {len(embedded_chunks)} chunks (original: {len(chunks)})")
         return embedded_chunks
     
     def save_embeddings(self, embedded_chunks: List[Dict], output_path: str):

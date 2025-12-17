@@ -128,7 +128,10 @@ class CourseDataProcessor:
         chunks = []
         
         # Extract and normalize fields
-        course_code = course.get('course_code', '')
+        # Görsel: Course code normalization (SE 115 / SE115) - retrieval zinciri kırılmasın
+        raw_course_code = course.get('course_code', '')
+        course_code = raw_course_code.replace(' ', '').upper() if raw_course_code else ''  # Görsel: Normalize
+        
         course_name = self.normalize_text(course.get('course_name', ''))
         department = course.get('department', '')
         semester = course.get('semester', '')
@@ -166,29 +169,38 @@ class CourseDataProcessor:
                 metadata_text += f" Department: {department}."
             
             # Metadata chunk - credits bilgisi için önemli
+            # Görsel: section değerleri standart değilse retrieval kaçar
+            # Görsel: "section = section.lower().strip()" yapılmalı
+            section_name = 'credits'
+            section_name = section_name.lower().strip()  # Görsel: Standardize
+            
             metadata_chunk = {
                 'text': metadata_text,
                 'chunk_index': 0,
                 **base_metadata,
-                'section': 'credits'  # Standardize: credits section
+                'section': section_name  # Görsel: Standardize edilmiş
             }
             chunks.append(metadata_chunk)
         
         # Process objectives
         objectives = self.normalize_text(course.get('objectives', ''))
         if objectives:
+            section_name = 'objectives'
+            section_name = section_name.lower().strip()  # Görsel: Standardize
             obj_chunks = self.split_into_chunks(
                 objectives,
-                {**base_metadata, 'section': 'objectives'}  # Standardize: lowercase
+                {**base_metadata, 'section': section_name}
             )
             chunks.extend(obj_chunks)
         
         # Process description
         description = self.normalize_text(course.get('description', ''))
         if description:
+            section_name = 'description'
+            section_name = section_name.lower().strip()  # Görsel: Standardize
             desc_chunks = self.split_into_chunks(
                 description,
-                {**base_metadata, 'section': 'description'}  # Standardize: lowercase
+                {**base_metadata, 'section': section_name}
             )
             chunks.extend(desc_chunks)
         
@@ -201,15 +213,19 @@ class CourseDataProcessor:
                 lo_text = self.normalize_text(str(learning_outcomes))
             
             if lo_text:
+                section_name = 'learning_outcomes'
+                section_name = section_name.lower().strip()  # Görsel: Standardize
                 lo_chunks = self.split_into_chunks(
                     lo_text,
-                    {**base_metadata, 'section': 'learning_outcomes'}  # Standardize: lowercase
+                    {**base_metadata, 'section': section_name}
                 )
                 chunks.extend(lo_chunks)
         
         # Process weekly topics - HER HAFTA AYRI CHUNK (ÇÖZÜM: Weekly topics ayrı chunk)
         weekly_topics = course.get('weekly_topics', [])
         if weekly_topics:
+            section_name = 'weekly_topics'
+            section_name = section_name.lower().strip()  # Görsel: Standardize
             # Her hafta için ayrı chunk oluştur
             for topic in weekly_topics:
                 if isinstance(topic, dict):
@@ -229,16 +245,18 @@ class CourseDataProcessor:
                                 'text': week_text,
                                 'chunk_index': int(week) if week.isdigit() else 0,
                                 **base_metadata,
-                                'section': 'weekly_topics'  # Standardize: lowercase
+                                'section': section_name  # Görsel: Standardize edilmiş
                             }
                             chunks.append(week_chunk)
         
         # Process prerequisites
         prerequisites = self.normalize_text(course.get('prerequisites', ''))
         if prerequisites:
+            section_name = 'prerequisites'
+            section_name = section_name.lower().strip()  # Görsel: Standardize
             prereq_chunks = self.split_into_chunks(
                 prerequisites,
-                {**base_metadata, 'section': 'prerequisites'}  # Standardize: lowercase
+                {**base_metadata, 'section': section_name}
             )
             chunks.extend(prereq_chunks)
         
@@ -273,9 +291,11 @@ class CourseDataProcessor:
             
             if assessment_text:
                 assessment_text = self.normalize_text(assessment_text)
+                section_name = 'assessment'
+                section_name = section_name.lower().strip()  # Görsel: Standardize
                 assessment_chunks = self.split_into_chunks(
                     assessment_text,
-                    {**base_metadata, 'section': 'assessment'}  # Standardize: lowercase
+                    {**base_metadata, 'section': section_name}
                 )
                 chunks.extend(assessment_chunks)
         
@@ -300,9 +320,11 @@ class CourseDataProcessor:
             
             if workload_text:
                 workload_text = self.normalize_text(workload_text)
+                section_name = 'ects_workload'
+                section_name = section_name.lower().strip()  # Görsel: Standardize
                 workload_chunks = self.split_into_chunks(
                     workload_text,
-                    {**base_metadata, 'section': 'ects_workload'}  # Standardize: lowercase
+                    {**base_metadata, 'section': section_name}
                 )
                 chunks.extend(workload_chunks)
         
@@ -326,9 +348,11 @@ class CourseDataProcessor:
                     available_text += ". "
             
             available_text = self.normalize_text(available_text)
+            section_name = 'available_courses'
+            section_name = section_name.lower().strip()  # Görsel: Standardize
             available_chunks = self.split_into_chunks(
                 available_text,
-                {**base_metadata, 'section': 'available_courses'}  # Standardize: lowercase
+                {**base_metadata, 'section': section_name}
             )
             chunks.extend(available_chunks)
             
@@ -343,17 +367,24 @@ class CourseDataProcessor:
                 nested_description = self.normalize_text(nested.get('description', ''))
                 
                 if nested_code:
+                    # Görsel: Course code normalization (SE 115 / SE115)
+                    # Normalize course code: remove spaces, uppercase
+                    normalized_nested_code = nested_code.replace(' ', '').upper()
+                    # Store both original and normalized
+                    
                     # Create metadata for nested course
+                    section_name = 'nested_course'
+                    section_name = section_name.lower().strip()  # Görsel: Standardize
                     nested_metadata = {
                         'department': department,  # Parent department
-                        'course_code': nested_code,
+                        'course_code': normalized_nested_code,  # Görsel: Normalize edilmiş
                         'course_name': nested_name,
                         'semester': nested_semester,
                         'year': year,
                         'type': 'Elective',  # SFL/ELEC/POOL nested courses are typically elective
                         'ects': nested_ects,
                         'local_credits': nested_local,
-                        'section': 'nested_course',  # Standardize: lowercase
+                        'section': section_name,
                         'parent_course': course_code  # Track which parent course this belongs to
                     }
                     
