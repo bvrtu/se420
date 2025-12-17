@@ -9,14 +9,23 @@ env/
 ENV/
 
 # Data
-# data/ klasörü artık GitHub'a eklenecek
+# data/ klasörü artık GitHub'a eklenecek - tüm içerik eklenecek
 # data/raw/
 # data/processed/
 # data/embeddings/
 # data/vector_db/
+
+# JSON dosyalarını ignore et, ama data/ klasöründekileri ekle
 *.json
-!data/**/*.json  # data/ klasöründeki JSON dosyalarını ekle
-!data/**/*.json  # data/ klasöründeki JSON dosyalarını ekle
+!data/**/*.json
+
+# PKL dosyalarını ignore et, ama data/ klasöründekileri ekle
+*.pkl
+!data/**/*.pkl
+
+# Index dosyalarını ignore et, ama data/ klasöründekileri ekle
+*.index
+!data/**/*.index
 
 # IDE
 .idea/
