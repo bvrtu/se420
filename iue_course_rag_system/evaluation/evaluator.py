@@ -134,7 +134,7 @@ class RAGEvaluator:
         }
     
     def _calculate_aggregate_metrics(self, results: List[Dict]) -> Dict:
-        """Calculate aggregate metrics across all questions"""
+        """Calculate aggregate metrics across all questions (Görsel: Hallucination / accuracy metrikleri eklendi)"""
         total = len(results)
         if total == 0:
             return {}
@@ -142,10 +142,15 @@ class RAGEvaluator:
         # Calculate averages
         avg_retrieval_accuracy = sum(r['metrics'].get('retrieval_accuracy', 0) for r in results) / total
         avg_groundedness = sum(r['metrics'].get('groundedness', 0) for r in results) / total
+        avg_accuracy = sum(r['metrics'].get('accuracy', 0) for r in results) / total  # Görsel: accuracy metrikleri
         
-        # Count hallucinations (low groundedness)
-        hallucinations = sum(1 for r in results if r['metrics'].get('groundedness', 1) < 0.5)
+        # Count hallucinations (low groundedness or explicit hallucination flag)
+        hallucinations = sum(1 for r in results if r['metrics'].get('is_hallucination', False) or r['metrics'].get('groundedness', 1) < 0.5)
         hallucination_rate = hallucinations / total
+        
+        # TR+EN format compliance (Görsel: TR+EN enforce testleri)
+        tr_en_compliant = sum(1 for r in results if r['metrics'].get('tr_en_format', {}).get('format_compliant', False))
+        tr_en_compliance_rate = tr_en_compliant / total if total > 0 else 0.0
         
         # Count by category
         category_counts = {}
@@ -156,8 +161,11 @@ class RAGEvaluator:
         return {
             'average_retrieval_accuracy': avg_retrieval_accuracy,
             'average_groundedness': avg_groundedness,
+            'average_accuracy': avg_accuracy,  # Görsel: accuracy metrikleri
             'hallucination_rate': hallucination_rate,
             'total_hallucinations': hallucinations,
+            'tr_en_compliance_rate': tr_en_compliance_rate,  # Görsel: TR+EN enforce testleri
+            'total_tr_en_compliant': tr_en_compliant,
             'category_distribution': category_counts
         }
     

@@ -7,6 +7,7 @@ import chromadb
 from chromadb.config import Settings
 from typing import List, Dict, Optional
 import logging
+import re
 from pathlib import Path
 
 logger = logging.getLogger(__name__)
@@ -114,21 +115,41 @@ class ChromaCourseDB:
     
     def search(self, query_embedding: List[float], n_results: int = 5, 
                department_filter: Optional[str] = None,
-               course_type_filter: Optional[str] = None) -> List[Dict]:
+               course_type_filter: Optional[str] = None,
+               filters: Optional[Dict] = None,
+               boost_section: Optional[str] = None) -> List[Dict]:
         """
-        Search for similar chunks
+        Search for similar chunks (Görsel: Metadata filtreleme eklendi)
         
         Args:
             query_embedding: Query embedding vector
             n_results: Number of results to return
             department_filter: Filter by department (optional)
             course_type_filter: Filter by course type (Mandatory/Elective) (optional)
+            filters: Dictionary with metadata filters (course_code, department, section) - STRING EQUALITY
+            boost_section: Section to boost (e.g., 'credits', 'weekly_topics') - not used in ChromaDB but kept for API consistency
             
         Returns:
             List of similar chunks with metadata
         """
-        # Build where clause for filtering
+        # Build where clause for filtering (Görsel: course_code filter eklendi)
         where_clause = {}
+        if filters:
+            # course_code exact match (STRING EQUALITY - semantic değil)
+            if 'course_code' in filters:
+                filter_code = filters['course_code'].replace(' ', '').upper()
+                # ChromaDB where clause for course_code matching
+                where_clause['course_code'] = {'$regex': f'^{re.escape(filter_code)}$'}
+            
+            # department exact match
+            if 'department' in filters:
+                where_clause['department'] = filters['department']
+            
+            # section exact match
+            if 'section' in filters:
+                where_clause['section'] = {'$regex': f'^{re.escape(filters["section"].lower())}$', '$options': 'i'}
+        
+        # Legacy filters
         if department_filter:
             where_clause['department'] = department_filter
         if course_type_filter:
@@ -137,23 +158,40 @@ class ChromaCourseDB:
         # Search
         results = self.collection.query(
             query_embeddings=[query_embedding],
-            n_results=n_results,
+            n_results=n_results * 2 if filters else n_results,  # Get more if filtering
             where=where_clause if where_clause else None
         )
         
-        # Format results
+        # Format results with similarity scores
         formatted_results = []
         if results['ids'] and len(results['ids'][0]) > 0:
             for i in range(len(results['ids'][0])):
+                distance = results['distances'][0][i] if 'distances' in results and results['distances'] else None
+                # Calculate similarity score (lower distance = higher similarity)
+                similarity = 1.0 / (1.0 + float(distance)) if distance is not None else 0.0
+                
+                metadata = results['metadatas'][0][i]
+                
+                # Section boost (Görsel: boost_section)
+                if boost_section:
+                    chunk_section = metadata.get('section', '').lower()
+                    if chunk_section == boost_section.lower():
+                        similarity *= 1.5
+                
                 result = {
                     'id': results['ids'][0][i],
                     'text': results['documents'][0][i],
-                    'metadata': results['metadatas'][0][i],
-                    'distance': results['distances'][0][i] if 'distances' in results else None
+                    'metadata': metadata,
+                    'distance': distance,
+                    'similarity': similarity
                 }
                 formatted_results.append(result)
         
-        return formatted_results
+        # Sort by similarity (highest first)
+        formatted_results.sort(key=lambda x: x.get('similarity', 0), reverse=True)
+        
+        # Return top n_results
+        return formatted_results[:n_results]
     
     def reset(self):
         """Reset the collection (delete all data)"""

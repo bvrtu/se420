@@ -176,28 +176,26 @@ class RAGPipeline:
         Returns:
             Generated response
         """
-        # KESİN PROMPT (BİREBİR KULLAN) - Hardcoded, override edilemez
-        prompt = f"""You are an academic Retrieval-Augmented Generation system.
+        # KESİN PROMPT (BİREBİR KULLAN) - Görseldeki template'e göre güncellendi
+        prompt = f"""You are an academic RAG system that MUST follow these rules:
 
-STRICT RULES:
-1. Always answer in BOTH Turkish and English.
-2. Both answers must contain EXACTLY the same information.
-3. Use ONLY the provided context.
-4. If information is missing, explicitly say so.
-5. Do NOT infer, assume, or generalize.
-6. Output format MUST be:
+1. Provide answers in BOTH Turkish and English.
+2. The Turkish and English answers must contain EXACTLY the same factual content.
+3. Use ONLY the retrieved documents.
+4. If info is missing, say so clearly in both languages.
 
+OUTPUT FORMAT:
 ------------------------------------------------------------
 ANSWER (TR)
 ------------------------------------------------------------
-(Turkish answer here)
+{{turkish_answer}}
 ------------------------------------------------------------
 ANSWER (EN)
 ------------------------------------------------------------
-(English answer here)
+{{english_answer}}
 ------------------------------------------------------------
 
-Course Information:
+Retrieved Documents:
 {context}
 
 User Question: {query}
@@ -284,57 +282,36 @@ Answer:"""
             if not course_type_filter:
                 course_type_filter = detected.get('course_type_filter')
         
-        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER)
-        
+        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görseldeki formata göre güncellendi
         # ÇÖZÜM B: SECTION-AWARE RETRIEVAL
-        section_boost = None
+        code = course_code  # extract_course_code(query) zaten yapıldı
+        section = None
         query_lower = query.lower()
-        if "haftalık" in query_lower or "weekly" in query_lower:
-            section_boost = "weekly_topics"
-        elif "kredi" in query_lower or "credit" in query_lower or "ects" in query_lower:
-            section_boost = "credits"
+        if "kredi" in query_lower or "credit" in query_lower:
+            section = "credits"
+        elif "haftalık" in query_lower or "weekly" in query_lower:
+            section = "weekly_topics"
         
-        # Step 1: Retrieve with hard filter if course_code exists
-        if course_code:
-            # ÇÖZÜM A: Hard filter with course_code
-            filters = {"course_code": course_code}
-            retrieved_chunks = self.retrieve(
-                query=enhanced_query,
-                n_results=n_results * 2,
-                department_filter=department_filter,
-                course_type_filter=course_type_filter,
-                filters=filters,
-                boost_section=section_boost
-            )
-        else:
-            retrieved_chunks = self.retrieve(
-                query=enhanced_query,
-                n_results=n_results,
-                department_filter=department_filter,
-                course_type_filter=course_type_filter,
-                filters=None,
-                boost_section=section_boost
-            )
+        # Step 1: Retrieve with hard filter and section boost
+        # Görseldeki formata göre: filter_course_code ve boost_section parametreleri
+        filters = {"course_code": code} if code else None
+        retrieved_chunks = self.retrieve(
+            query=enhanced_query,
+            n_results=n_results * 2 if code else n_results,
+            department_filter=department_filter,
+            course_type_filter=course_type_filter,
+            filters=filters,
+            boost_section=section
+        )
         
-        # ÇÖZÜM C: DATA-NOT-FOUND GUARD
-        if not retrieved_chunks:
+        # ÇÖZÜM C: DATA-NOT-FOUND GUARD - Görseldeki formata göre güncellendi (0.30 threshold)
+        if not retrieved_chunks or max((d.get('similarity', 0) for d in retrieved_chunks), default=0) < 0.30:
             return {
                 'query': query,
                 'retrieved_chunks': [],
                 'context': '',
                 'response': build_no_data_answer(),
                 'num_results': 0
-            }
-        
-        # Check similarity threshold (ÇÖZÜM C: similarity < 0.25 → build_no_data_answer)
-        max_similarity = max(chunk.get('similarity', 0) for chunk in retrieved_chunks) if retrieved_chunks else 0
-        if max_similarity < 0.25:
-            return {
-                'query': query,
-                'retrieved_chunks': retrieved_chunks,
-                'context': '',
-                'response': build_no_data_answer(),
-                'num_results': len(retrieved_chunks)
             }
         
         # Step 2: Generate context

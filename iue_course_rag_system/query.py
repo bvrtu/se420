@@ -13,31 +13,23 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-# ÇÖZÜM: COURSE CODE DETECTION (ZORUNLU)
+# ÇÖZÜM: COURSE CODE DETECTION (ZORUNLU) - Görseldeki formata göre güncellendi
+import re
+
 COURSE_CODE_REGEX = r"\b[A-Z]{2,4}\s?\d{3}\b"
 
-
-def extract_course_code(query: str) -> str:
+def extract_course_code(text: str):
     """
-    Extract course code from query (e.g., "SE 115", "FR 103", "se115")
+    Extract course code from text (e.g., "SE 115", "FR 103", "se115")
     
     Args:
-        query: User query
+        text: Text to extract course code from
         
     Returns:
-        Extracted course code (normalized) or None
+        Extracted course code (normalized, spaces removed) or None
     """
-    query_upper = query.upper()
-    match = re.search(COURSE_CODE_REGEX, query_upper)
-    if match:
-        code = match.group(0).replace(' ', '')
-        # Normalize: "SE115" -> "SE 115"
-        if len(code) >= 5:
-            letters = re.match(r'^[A-Z]+', code).group(0)
-            numbers = code[len(letters):]
-            return f"{letters} {numbers}"
-        return code
-    return None
+    m = re.search(COURSE_CODE_REGEX, text.upper())
+    return m.group(0).replace(" ", "") if m else None
 
 from embeddings.embedder import CourseEmbedder
 from vector_db.faiss_db import FAISSCourseDB

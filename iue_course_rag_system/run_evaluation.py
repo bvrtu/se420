@@ -87,8 +87,11 @@ def main():
     aggregate = results.get('aggregate_metrics', {})
     print(f"\nAverage Retrieval Accuracy: {aggregate.get('average_retrieval_accuracy', 0):.2%}")
     print(f"Average Groundedness: {aggregate.get('average_groundedness', 0):.2%}")
+    print(f"Average Accuracy: {aggregate.get('average_accuracy', 0):.2%}")  # Görsel: accuracy metrikleri
     print(f"Hallucination Rate: {aggregate.get('hallucination_rate', 0):.2%}")
     print(f"Total Hallucinations: {aggregate.get('total_hallucinations', 0)}")
+    print(f"TR+EN Format Compliance: {aggregate.get('tr_en_compliance_rate', 0):.2%}")  # Görsel: TR+EN enforce testleri
+    print(f"Total TR+EN Compliant: {aggregate.get('total_tr_en_compliant', 0)}")
     
     print("\nCategory Distribution:")
     for category, count in aggregate.get('category_distribution', {}).items():
