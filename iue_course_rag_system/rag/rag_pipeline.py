@@ -9,7 +9,7 @@ import logging
 import re
 from typing import List, Dict, Optional
 from pathlib import Path
-from .answer_formatter import format_answer, build_no_data_answer
+from .answer_formatter import format_answer, build_no_data_answer, build_partial_answer, build_pool_course_answer
 
 logger = logging.getLogger(__name__)
 
@@ -275,6 +275,10 @@ Answer:"""
         if not course_code:
             course_code = self._extract_course_code(query)
         
+        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görsel: Course code hard filter GARANTİ
+        # Görsel: "Bu bir 'optimizasyon' değil, Bu bir akademik zorunluluk"
+        code = course_code  # extract_course_code(query) zaten yapıldı - ÖNCE TANIMLA
+        
         # Auto-detect filters from query if not provided
         if not department_filter or not course_type_filter:
             detected = self._detect_query_filters(query)
@@ -283,19 +287,72 @@ Answer:"""
             if not course_type_filter:
                 course_type_filter = detected.get('course_type_filter')
         
-        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görsel: Course code hard filter GARANTİ
-        # Görsel: "Bu bir 'optimizasyon' değil, Bu bir akademik zorunluluk"
-        code = course_code  # extract_course_code(query) zaten yapıldı
+        # Görsel: Department filter zorunlu - Core courses gibi sorularda
+        # Görsel: "Retriever'a şu filtre zorunlu olmalı: department == 'Software Engineering'"
+        # Görsel: "Bu filtre şu an her soruda aktif değil" → Zorunlu yap
+        query_lower = query.lower()
         
         # Görsel (2): Section-aware retrieval hâlâ "soft"
         # Görsel: "sadece boost ediliyorsa ❌" ve "ama zorlanmıyorsa ❌"
         # Görsel: "Haftalık konu sorusu, objectives'tan cevaplanabilir" → Hard filter olmalı
-        section = None
-        query_lower = query.lower()
+        section = None  # ÖNCE TANIMLA
+        requested_section = None  # Görsel: Fallback için hangi section arandığını hatırla
         if "kredi" in query_lower or "credit" in query_lower or "ects" in query_lower:
             section = "credits"  # Görsel: "prerequisites" değil, "credits" olmalı
+            requested_section = "credits"
         elif "haftalık" in query_lower or "weekly" in query_lower:
             section = "weekly_topics"  # Görsel: "objectives" değil, "weekly_topics" olmalı
+            requested_section = "weekly_topics"
+        
+        intent_detected = None
+        if not code:  # Course code yoksa intent kontrolü yap
+            if "core" in query_lower or "important" in query_lower or "önemli" in query_lower or "temel" in query_lower:
+                intent_detected = "core_courses"  # Görsel: "important_courses", "core_courses"
+            elif "mandatory" in query_lower or "required" in query_lower or "zorunlu" in query_lower:
+                intent_detected = "mandatory_courses"
+            
+            # Görsel: "if no_course_code and intent in ['important_courses', 'core_courses']: restrict retrieval to: department == 'Software Engineering' AND section in ['description', 'objectives']"
+            if intent_detected in ["core_courses", "important_courses", "mandatory_courses"]:
+                # Department filter zorunlu (Görsel: Akademik hata önleme)
+                if not department_filter:
+                    # Query'den department çıkar, yoksa default Software Engineering
+                    if "software engineering" in query_lower or "yazılım mühendisliği" in query_lower:
+                        department_filter = "Software Engineering"
+                    elif "computer engineering" in query_lower or "bilgisayar mühendisliği" in query_lower:
+                        department_filter = "Computer Engineering"
+                    elif "electrical" in query_lower or "electronics" in query_lower:
+                        department_filter = "Electrical and Electronics Engineering"
+                    elif "industrial engineering" in query_lower:
+                        department_filter = "Industrial Engineering"
+                    else:
+                        # Default: Software Engineering (en çok sorulan)
+                        department_filter = "Software Engineering"
+                        logger.info(f"No department specified in query, defaulting to Software Engineering for intent: {intent_detected}")
+                
+                # Görsel: Section filter - "section in ['description', 'objectives']"
+                # Core courses için sadece description ve objectives section'larından arama yap
+                if not section:  # Eğer başka bir section filter yoksa
+                    # Core courses için section filter ekle (description veya objectives)
+                    # Bu filter'ı retrieve'de kullanacağız
+                    logger.info(f"Intent detected: {intent_detected}, enforcing department filter: {department_filter}, restricting to sections: description, objectives")
+        
+        # Görsel: Pool course kontrolü (ELEC 001, POOL 003 gibi)
+        # Görsel: "Bu bilgi dataset'te dolaylı olarak var, ama sen pipeline'da pool logic'i hiç ele almıyorsun"
+        is_pool_course = False
+        if code:
+            code_upper = code.upper()
+            if code_upper.startswith("ELEC") or code_upper.startswith("POOL") or code_upper.startswith("SFL"):
+                is_pool_course = True
+                # Görsel: Pool course için özel açıklama
+                if requested_section == "credits":
+                    logger.info(f"Pool course detected: {code}, returning pool course explanation")
+                    return {
+                        'query': query,
+                        'retrieved_chunks': [],
+                        'context': '',
+                        'response': build_pool_course_answer(code),
+                        'num_results': 0
+                    }
         
         # Görsel: Section varsa, filters'a ekle (hard filter, sadece boost değil)
         if section and code:
@@ -314,6 +371,7 @@ Answer:"""
         # Görsel: "Course code varsa → başka ders ASLA gelmemeli"
         # Görsel: "strict=True" parametresi olmalı
         # Görsel: "filters_if_any" optional ise akademik risk → Hard filter GARANTİ
+        mark_as_partial = False  # Görsel: Fallback mekanizması için flag
         if filters:
             # Görsel: Course code VEYA section varsa MUTLAKA filter uygula (akademik zorunluluk)
             retrieved_chunks = self.retrieve(
@@ -325,22 +383,112 @@ Answer:"""
                 boost_section=section,
                 strict=True  # Görsel: "Strict" yoksa, bu garanti yoktur
             )
+            
+            # Görsel: KESİN ÇÖZÜM - Fallback mekanizması
+            # Görsel: "Önce exact section, yoksa fallback"
+            # Görsel: "chunks = search(course_code, requested_section); if not chunks: chunks = search(course_code, any_section)"
+            if not retrieved_chunks and code and requested_section:
+                # Exact section bulunamadı, fallback: any_section'dan arama
+                logger.info(f"Exact section '{requested_section}' not found for {code}, trying fallback: any_section")
+                fallback_filters = {"course_code": code}  # Section filter'ı kaldır
+                retrieved_chunks = self.retrieve(
+                    query=enhanced_query,
+                    n_results=n_results * 2,
+                    department_filter=department_filter,
+                    course_type_filter=course_type_filter,
+                    filters=fallback_filters,
+                    boost_section=None,
+                    strict=True
+                )
+                if retrieved_chunks:
+                    mark_as_partial = True  # Görsel: "mark_answer_as_partial = True"
+                    logger.info(f"Fallback successful: found {len(retrieved_chunks)} chunks for {code}")
         else:
             # Course code ve section yoksa normal search
-            retrieved_chunks = self.retrieve(
-                query=enhanced_query,
-                n_results=n_results,
-                department_filter=department_filter,
-                course_type_filter=course_type_filter,
-                filters=None,
-                boost_section=section,
-                strict=False
-            )
+            # Görsel: General query guard - Course code yoksa ve intent belirsizse, çok sıkı filtreleme
+            # Görsel: "if retrieved_chunks < MIN_THRESHOLD: DO NOT call LLM, return 'Dataset-based answer not available'"
+            if not code and intent_detected in ["core_courses", "important_courses", "mandatory_courses"]:
+                # Görsel: Core courses için section filter ekle
+                # Görsel: "restrict retrieval to: department == 'Software Engineering' AND section in ['description', 'objectives']"
+                # Section filter'ı filters'a ekle (description veya objectives)
+                # Not: FAISS/ChromaDB'de section filter'ı "description" veya "objectives" olarak uygulayamayız direkt,
+                # ama boost_section ile öncelik verebiliriz. Daha iyi çözüm: retrieve sonrası filtreleme
+                retrieved_chunks = self.retrieve(
+                    query=enhanced_query,
+                    n_results=n_results * 2,  # Daha fazla sonuç al, sonra filtrele
+                    department_filter=department_filter,  # Görsel: Department filter zorunlu
+                    course_type_filter=course_type_filter,
+                    filters=None,
+                    boost_section=None,  # Section boost yok, retrieve sonrası filtreleme yapacağız
+                    strict=False
+                )
+                # Görsel: Section filter - sadece description ve objectives
+                if retrieved_chunks:
+                    filtered_chunks = [chunk for chunk in retrieved_chunks 
+                                     if chunk.get('metadata', {}).get('section', '').lower() in ['description', 'objectives']]
+                    if filtered_chunks:
+                        retrieved_chunks = filtered_chunks[:n_results]  # Top n_results
+                        logger.info(f"Section filter applied: {len(filtered_chunks)} chunks from description/objectives sections")
+                    else:
+                        # Eğer description/objectives yoksa, tüm section'ları kullan (fallback)
+                        logger.warning(f"No chunks found in description/objectives sections, using all sections")
+            elif not code and not intent_detected:
+                # Görsel: Intent belirsiz, course code yok → Çok sıkı filtreleme
+                # Department filter zorunlu (eğer belirtilmişse)
+                if department_filter:
+                    # Department filter ile arama yap
+                    retrieved_chunks = self.retrieve(
+                        query=enhanced_query,
+                        n_results=n_results,
+                        department_filter=department_filter,
+                        course_type_filter=course_type_filter,
+                        filters=None,
+                        boost_section=section,
+                        strict=False
+                    )
+                else:
+                    # Görsel: "Retriever her şeyi getiriyor" → Çok geniş arama, guard gerekli
+                    retrieved_chunks = self.retrieve(
+                        query=enhanced_query,
+                        n_results=n_results,
+                        department_filter=None,
+                        course_type_filter=course_type_filter,
+                        filters=None,
+                        boost_section=section,
+                        strict=False
+                    )
+            else:
+                retrieved_chunks = self.retrieve(
+                    query=enhanced_query,
+                    n_results=n_results,
+                    department_filter=department_filter,
+                    course_type_filter=course_type_filter,
+                    filters=None,
+                    boost_section=section,
+                    strict=False
+                )
         
         # Görsel (3): "Veri yok" guard hâlâ %100 değil
         # Görsel: "az context ile tahmin yapmaya devam eder" → Bu da hallucination kapısıdır
         max_similarity = max((d.get('similarity', 0) for d in retrieved_chunks), default=0) if retrieved_chunks else 0
         min_chunks_for_context = 3  # Görsel: Az context ile LLM tahmin yapmaya devam eder
+        
+        # Görsel: General query guard - "if retrieved_chunks < MIN_THRESHOLD: DO NOT call LLM"
+        # Görsel: "Bu satır hallucination'ı %90 keser"
+        MIN_THRESHOLD = 5  # Görsel: Minimum chunk sayısı
+        if not code and not intent_detected:
+            # Görsel: Course code yok, intent belirsiz → Çok sıkı guard
+            if len(retrieved_chunks) < MIN_THRESHOLD:
+                logger.warning(f"General query guard triggered: chunks={len(retrieved_chunks)} < MIN_THRESHOLD={MIN_THRESHOLD}, intent={intent_detected}")
+                tr = "Bu soru için yeterli veri bulunamadı. Lütfen daha spesifik bir soru sorun (örneğin, bir ders kodu belirtin)."
+                en = "Insufficient data found for this query. Please ask a more specific question (e.g., specify a course code)."
+                return {
+                    'query': query,
+                    'retrieved_chunks': retrieved_chunks,
+                    'context': '',
+                    'response': format_answer(tr, en),
+                    'num_results': len(retrieved_chunks)
+                }
         
         if not retrieved_chunks or max_similarity < 0.30 or len(retrieved_chunks) < min_chunks_for_context:
             # Görsel: Similarity düşükse VEYA az context varsa LLM'e gitmeden kesin guard
@@ -370,6 +518,20 @@ Answer:"""
         # Step 3: Generate response
         response = self.generate_response(query, context)
         
+        # Görsel: Fallback mekanizması - Partial answer işaretleme
+        # Görsel: "Ve cevapta şunu ekle: Bu ders için kredi bilgisi veri setinde doğrudan bulunamadığı için..."
+        if mark_as_partial and requested_section:
+            # Partial answer'a çevir (disclaimer ekle)
+            # LLM'in cevabından TR ve EN kısımlarını çıkar
+            tr_match = re.search(r'(?:ANSWER|CEVAP)\s*\(TR\)[:\-]*\s*(.*?)(?=(?:ANSWER|CEVAP)\s*\(EN\)|$)', response, re.IGNORECASE | re.DOTALL)
+            en_match = re.search(r'(?:ANSWER|CEVAP)\s*\(EN\)[:\-]*\s*(.*?)$', response, re.IGNORECASE | re.DOTALL)
+            
+            if tr_match and en_match:
+                tr_content = tr_match.group(1).strip()
+                en_content = en_match.group(1).strip()
+                response = build_partial_answer(tr_content, en_content, info_type="kredi" if requested_section == "credits" else requested_section)
+                logger.info(f"Marked answer as partial for {code} (requested section: {requested_section})")
+        
         # Görsel: TR+EN format assertion (Kod seviyesinde garanti)
         # Görsel: "assert 'ANSWER (TR)' in answer" ve "assert 'ANSWER (EN)' in answer"
         # Görsel: "LLM 'unutursa' sistem çöker" → Kod seviyesinde kontrol
@@ -398,11 +560,12 @@ Answer:"""
         
         # Görsel: Final assertion (kod seviyesinde garanti)
         # Görsel: "LLM bir gün tek dil döner ve sistem 'sessizce bozulur'" → Assert ile önle
+        # Görsel: "if 'ANSWER (TR)' not in answer or 'ANSWER (EN)' not in answer: raise RuntimeError('Bilingual output violation')"
         final_check = response.upper()
-        assert "ANSWER (TR)" in final_check or "CEVAP (TR)" in final_check, \
-            "TR section missing in response - system guarantee failed"
-        assert "ANSWER (EN)" in final_check or "CEVAP (EN)" in final_check, \
-            "EN section missing in response - system guarantee failed"
+        if "ANSWER (TR)" not in final_check and "CEVAP (TR)" not in final_check:
+            raise RuntimeError("Bilingual output violation: TR section missing in response - system guarantee failed")
+        if "ANSWER (EN)" not in final_check and "CEVAP (EN)" not in final_check:
+            raise RuntimeError("Bilingual output violation: EN section missing in response - system guarantee failed")
         
         return {
             'query': query,
