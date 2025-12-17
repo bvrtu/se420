@@ -53,18 +53,39 @@ class RAGEvaluator:
         department_filter = question.get('department_filter')
         course_type_filter = question.get('course_type_filter')
         
+        # Extract course code from query (ÇÖZÜM: Course code detection)
+        import re
+        pattern = r'\b([A-Z]{2,4})\s*(\d{3,4})\b'
+        match = re.search(pattern, query.upper())
+        if match:
+            code = match.group(1)
+            num = match.group(2)
+            course_code = f"{code} {num}"
+        else:
+            course_code = None
+        
         # Run RAG query
         result = self.rag_pipeline.query(
             query=query,
-            n_results=question.get('n_results', 5),
+            n_results=question.get('n_results', 15),
             department_filter=department_filter,
-            course_type_filter=course_type_filter
+            course_type_filter=course_type_filter,
+            course_code=course_code
         )
+        
+        actual_answer = result.get('response', '')
+        
+        # ÇÖZÜM: Trap question kontrolü (HALLUCINATION BİTER)
+        is_trap = category == 'trap'
+        if is_trap:
+            # Trap question'larda "bulunmamaktadır" kontrolü
+            assert "bulunmamaktadır" in actual_answer.lower() or "not available" in actual_answer.lower() or "not found" in actual_answer.lower(), \
+                f"Trap question should contain 'bulunmamaktadır' or 'not available'. Got: {actual_answer[:100]}"
         
         # Calculate metrics
         metrics = calculate_metrics(
             expected_answer=expected_answer,
-            actual_answer=result.get('response', ''),
+            actual_answer=actual_answer,
             retrieved_chunks=result.get('retrieved_chunks', [])
         )
         
@@ -72,9 +93,10 @@ class RAGEvaluator:
             'question': query,
             'category': category,
             'expected_answer': expected_answer,
-            'actual_answer': result.get('response', ''),
+            'actual_answer': actual_answer,
             'retrieved_chunks_count': result.get('num_results', 0),
-            'metrics': metrics
+            'metrics': metrics,
+            'is_trap': is_trap
         }
     
     def evaluate_all(self, questions: Optional[List[Dict]] = None) -> Dict:

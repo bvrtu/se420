@@ -9,6 +9,7 @@ import logging
 import re
 from typing import List, Dict, Optional
 from pathlib import Path
+from .answer_formatter import format_answer, build_no_data_answer
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +71,9 @@ class RAGPipeline:
     
     def retrieve(self, query: str, n_results: int = 15,
                  department_filter: Optional[str] = None,
-                 course_type_filter: Optional[str] = None) -> List[Dict]:
+                 course_type_filter: Optional[str] = None,
+                 filters: Optional[Dict] = None,
+                 boost_section: Optional[str] = None) -> List[Dict]:
         """
         Retrieve relevant chunks for a query
         
@@ -79,6 +82,8 @@ class RAGPipeline:
             n_results: Number of results to retrieve
             department_filter: Filter by department (optional)
             course_type_filter: Filter by course type (optional)
+            filters: Dictionary with metadata filters (course_code, department, section) - STRING EQUALITY
+            boost_section: Section to boost (e.g., 'credits', 'weekly_topics')
             
         Returns:
             List of relevant chunks
@@ -91,7 +96,9 @@ class RAGPipeline:
             query_embedding=query_embedding,
             n_results=n_results,
             department_filter=department_filter,
-            course_type_filter=course_type_filter
+            course_type_filter=course_type_filter,
+            filters=filters,
+            boost_section=boost_section
         )
         
         return results
@@ -169,75 +176,31 @@ class RAGPipeline:
         Returns:
             Generated response
         """
-        # Build prompt
-        prompt = f"""You are an intelligent course information assistant for the Faculty of Engineering at Izmir University of Economics.
+        # KESİN PROMPT (BİREBİR KULLAN) - Hardcoded, override edilemez
+        prompt = f"""You are an academic Retrieval-Augmented Generation system.
 
-Based on the following course information, answer the user's question accurately and comprehensively.
+STRICT RULES:
+1. Always answer in BOTH Turkish and English.
+2. Both answers must contain EXACTLY the same information.
+3. Use ONLY the provided context.
+4. If information is missing, explicitly say so.
+5. Do NOT infer, assume, or generalize.
+6. Output format MUST be:
+
+------------------------------------------------------------
+ANSWER (TR)
+------------------------------------------------------------
+(Turkish answer here)
+------------------------------------------------------------
+ANSWER (EN)
+------------------------------------------------------------
+(English answer here)
+------------------------------------------------------------
 
 Course Information:
 {context}
 
 User Question: {query}
-
-CRITICAL INSTRUCTIONS:
-- Answer based ONLY on the provided course information
-- Pay attention to ALL metadata fields in each source:
-  * Course Code (e.g., "SE 115", "FR 103", "CE 304", "SFL 1013")
-  * Course Name
-  * Department (Software Engineering, Computer Engineering, Electrical and Electronics Engineering, Industrial Engineering)
-  * Type: "Mandatory" or "Elective" (this is CRITICAL for filtering)
-  * ECTS Credits: Number of ECTS credits (can be "Not specified" if not available)
-  * Local Credits: Number of local credits (can be "Not specified" if not available)
-  * Semester: Fall, Spring, or Fall/Spring
-  * Year: Academic year
-  * Section: Which part of course info (course_metadata, objectives, description, prerequisites, nested_course, etc.)
-
-FOR QUESTIONS ABOUT CREDITS/ECTS (e.g., "SE 115 kaç kredi", "How much ECTS is FR 103"):
-  * ALWAYS check the "ECTS Credits" field in metadata - it shows the exact number or "Not specified"
-  * ALWAYS check the "Local Credits" field in metadata
-  * If ECTS Credits shows a number (e.g., "5"), answer: "SE 115 has 5 ECTS credits"
-  * If asking "kaç kredi" (Turkish), provide BOTH ECTS and Local Credits: "SE 115 has 5 ECTS credits and 3 local credits"
-  * If ECTS Credits shows "Not specified", check the Content field for credit information
-  * DO NOT say "I don't have information" if ECTS Credits field exists - check if it's a number or "Not specified"
-
-FOR QUESTIONS ABOUT MANDATORY/ELECTIVE COURSES:
-  * Look for "Type: Mandatory" or "Type: Elective" in the Type field
-  * For "List all mandatory courses in Software Engineering":
-    - Find ALL sources where Department is "Software Engineering" AND Type is "Mandatory"
-    - List EVERY course with: Course Code, Course Name, ECTS Credits
-    - Format: "1. SE 115 - Introduction to Programming I (ECTS: 5, Type: Mandatory)"
-  * DO NOT miss any courses - check ALL sources
-
-FOR COURSE CODE QUESTIONS (e.g., "SE 115", "FR 103", "se 216", "fr103"):
-  * Match course codes case-insensitively: "SE 115" = "se 115" = "SE115" = "se115"
-  * "FR 103" = "fr103" = "FR103" = "fr 103" (all refer to the same course)
-  * Look for the course code in the "Course Code" metadata field
-  * Also check if course code appears in the Content text
-  * For nested courses (FR 103, ITL 103, etc.), they may be in sources with section "nested_course"
-
-FOR QUESTIONS ABOUT SPECIFIC COURSES:
-  * Find the course by matching the course code in metadata (case-insensitive)
-  * Look through ALL sources to find ALL matching course codes
-  * Provide ALL available information: Course Code, Course Name, ECTS Credits, Local Credits, Type, Semester, Department
-  * Example answer: "Course Code: SE 115, Course Name: Introduction to Programming I, ECTS Credits: 5, Local Credits: 3, Type: Mandatory, Department: Software Engineering"
-
-FOR LIST QUESTIONS:
-  * Provide COMPLETE lists with ALL matching courses from ALL sources
-  * Include for each course: Course Code, Course Name, ECTS Credits, Local Credits, Type
-  * Format: "1. SE 115 - Introduction to Programming I (ECTS: 5, Local Credits: 3, Type: Mandatory, Department: Software Engineering)"
-  * DO NOT miss any courses - be thorough
-
-IF INFORMATION IS NOT AVAILABLE:
-  * Only say "I don't have information about this in the course data" if you've checked ALL sources and the information is truly not there
-  * DO NOT say "I cannot provide guidance" or "Sorry, but I am unable to complete your request"
-  * DO NOT make up information
-
-BE SPECIFIC AND CITE:
-  * Always include Course Code (e.g., "SE 115", "FR 103")
-  * Always include Department name
-  * Always include ECTS Credits and Local Credits (if available)
-  * Always include Type (Mandatory/Elective)
-  * Include any other relevant details from metadata
 
 Answer:"""
         
@@ -247,14 +210,25 @@ Answer:"""
                     model=self.model_name,
                     prompt=prompt,
                     options={
-                        "temperature": 0.7,
+                        "temperature": 0.3,  # Lower temperature for more factual responses
                         "top_p": 0.9,
                     }
                 )
-                return response['response']
+                raw_response = response['response']
+                
+                # Format response through answer_formatter (ÇÖZÜM: LLM'den gelen cevabı buradan geçirmeden yazdırma)
+                # Check if response already has TR/EN format
+                if "ANSWER (TR)" in raw_response and "ANSWER (EN)" in raw_response:
+                    return raw_response
+                else:
+                    # If LLM didn't follow format, create TR+EN format
+                    # Try to detect if response is in Turkish or English
+                    tr_response = raw_response
+                    en_response = raw_response  # Default: same for both
+                    return format_answer(tr_response, en_response)
             except Exception as e:
                 logger.error(f"Error generating response with Ollama: {e}")
-                return f"Error generating response: {str(e)}"
+                return build_no_data_answer()
         
         elif self.llm_provider == "huggingface":
             try:
@@ -280,7 +254,8 @@ Answer:"""
     
     def query(self, query: str, n_results: int = 15,
               department_filter: Optional[str] = None,
-              course_type_filter: Optional[str] = None) -> Dict:
+              course_type_filter: Optional[str] = None,
+              course_code: Optional[str] = None) -> Dict:
         """
         Complete RAG query: retrieve and generate
         
@@ -289,12 +264,17 @@ Answer:"""
             n_results: Number of results to retrieve
             department_filter: Filter by department (optional)
             course_type_filter: Filter by course type (optional)
+            course_code: Extracted course code from query (optional, will extract if not provided)
             
         Returns:
             Dictionary with query, retrieved chunks, context, and response
         """
         # Enhance query for better retrieval
         enhanced_query = self._enhance_query(query)
+        
+        # Auto-detect course code if not provided
+        if not course_code:
+            course_code = self._extract_course_code(query)
         
         # Auto-detect filters from query if not provided
         if not department_filter or not course_type_filter:
@@ -304,46 +284,58 @@ Answer:"""
             if not course_type_filter:
                 course_type_filter = detected.get('course_type_filter')
         
-        # Step 1: Retrieve
-        # If course code detected, also search with just the course code
-        course_code = self._extract_course_code(query)
+        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER)
+        
+        # ÇÖZÜM B: SECTION-AWARE RETRIEVAL
+        section_boost = None
+        query_lower = query.lower()
+        if "haftalık" in query_lower or "weekly" in query_lower:
+            section_boost = "weekly_topics"
+        elif "kredi" in query_lower or "credit" in query_lower or "ects" in query_lower:
+            section_boost = "credits"
+        
+        # Step 1: Retrieve with hard filter if course_code exists
         if course_code:
-            # Search with course code for better matching
-            code_query = course_code
+            # ÇÖZÜM A: Hard filter with course_code
+            filters = {"course_code": course_code}
             retrieved_chunks = self.retrieve(
-                query=code_query,
-                n_results=n_results * 2,  # Get more results when searching by code
-                department_filter=department_filter,
-                course_type_filter=course_type_filter
-            )
-            # Also try enhanced query
-            enhanced_chunks = self.retrieve(
                 query=enhanced_query,
-                n_results=n_results,
+                n_results=n_results * 2,
                 department_filter=department_filter,
-                course_type_filter=course_type_filter
+                course_type_filter=course_type_filter,
+                filters=filters,
+                boost_section=section_boost
             )
-            # Combine and deduplicate
-            all_chunks = retrieved_chunks + enhanced_chunks
-            seen_ids = set()
-            unique_chunks = []
-            for chunk in all_chunks:
-                chunk_id = chunk.get('id', '')
-                if chunk_id not in seen_ids:
-                    seen_ids.add(chunk_id)
-                    unique_chunks.append(chunk)
-            retrieved_chunks = unique_chunks
-            # Prioritize by course code
-            retrieved_chunks = self._prioritize_by_course_code(retrieved_chunks, course_code)
-            # Limit to n_results
-            retrieved_chunks = retrieved_chunks[:n_results]
         else:
             retrieved_chunks = self.retrieve(
                 query=enhanced_query,
                 n_results=n_results,
                 department_filter=department_filter,
-                course_type_filter=course_type_filter
+                course_type_filter=course_type_filter,
+                filters=None,
+                boost_section=section_boost
             )
+        
+        # ÇÖZÜM C: DATA-NOT-FOUND GUARD
+        if not retrieved_chunks:
+            return {
+                'query': query,
+                'retrieved_chunks': [],
+                'context': '',
+                'response': build_no_data_answer(),
+                'num_results': 0
+            }
+        
+        # Check similarity threshold (ÇÖZÜM C: similarity < 0.25 → build_no_data_answer)
+        max_similarity = max(chunk.get('similarity', 0) for chunk in retrieved_chunks) if retrieved_chunks else 0
+        if max_similarity < 0.25:
+            return {
+                'query': query,
+                'retrieved_chunks': retrieved_chunks,
+                'context': '',
+                'response': build_no_data_answer(),
+                'num_results': len(retrieved_chunks)
+            }
         
         # Step 2: Generate context
         context = self.generate_context(retrieved_chunks)

@@ -5,12 +5,39 @@ Interactive query interface for the RAG system
 
 import argparse
 import sys
+import re
 import logging
 from pathlib import Path
 
 # Add project root to path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
+
+# ÇÖZÜM: COURSE CODE DETECTION (ZORUNLU)
+COURSE_CODE_REGEX = r"\b[A-Z]{2,4}\s?\d{3}\b"
+
+
+def extract_course_code(query: str) -> str:
+    """
+    Extract course code from query (e.g., "SE 115", "FR 103", "se115")
+    
+    Args:
+        query: User query
+        
+    Returns:
+        Extracted course code (normalized) or None
+    """
+    query_upper = query.upper()
+    match = re.search(COURSE_CODE_REGEX, query_upper)
+    if match:
+        code = match.group(0).replace(' ', '')
+        # Normalize: "SE115" -> "SE 115"
+        if len(code) >= 5:
+            letters = re.match(r'^[A-Z]+', code).group(0)
+            numbers = code[len(letters):]
+            return f"{letters} {numbers}"
+        return code
+    return None
 
 from embeddings.embedder import CourseEmbedder
 from vector_db.faiss_db import FAISSCourseDB
@@ -70,9 +97,15 @@ def interactive_query(rag_pipeline):
                 print("  - How many elective courses are in the final year?")
                 continue
             
+            # ÇÖZÜM: Course code detection (ZORUNLU)
+            course_code = extract_course_code(query)
+            
             # Run query
             print("\nProcessing query...")
-            result = rag_pipeline.query(query, n_results=15)
+            if course_code:
+                print(f"Detected course code: {course_code}")
+            
+            result = rag_pipeline.query(query, n_results=15, course_code=course_code)
             
             # Display results
             print("\n" + "-"*60)
@@ -131,7 +164,12 @@ def main():
     
     # Run query
     if args.query:
-        result = rag_pipeline.query(args.query, n_results=15)
+        # ÇÖZÜM: Course code detection (ZORUNLU)
+        course_code = extract_course_code(args.query)
+        if course_code:
+            print(f"Detected course code: {course_code}")
+        
+        result = rag_pipeline.query(args.query, n_results=15, course_code=course_code)
         print("\n" + "="*60)
         print("QUERY:", args.query)
         print("="*60)

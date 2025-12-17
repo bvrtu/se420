@@ -102,7 +102,9 @@ class FAISSCourseDB:
     
     def search(self, query_embedding: List[float], n_results: int = 5,
                department_filter: Optional[str] = None,
-               course_type_filter: Optional[str] = None) -> List[Dict]:
+               course_type_filter: Optional[str] = None,
+               filters: Optional[Dict] = None,
+               boost_section: Optional[str] = None) -> List[Dict]:
         """
         Search for similar chunks
         
@@ -111,6 +113,8 @@ class FAISSCourseDB:
             n_results: Number of results to return
             department_filter: Filter by department (optional)
             course_type_filter: Filter by course type (Mandatory/Elective) (optional)
+            filters: Dictionary with metadata filters (course_code, department, section) - STRING EQUALITY
+            boost_section: Section to boost (e.g., 'credits', 'weekly_topics') - increases relevance score
             
         Returns:
             List of similar chunks with metadata
@@ -132,13 +136,13 @@ class FAISSCourseDB:
         
         # Search (get more results for better coverage)
         # If filtering, get more results to ensure we have enough after filtering
-        k = min(n_results * 5, self.index.ntotal) if (department_filter or course_type_filter) else n_results * 2
+        k = min(n_results * 5, self.index.ntotal) if (department_filter or course_type_filter or filters) else n_results * 2
         k = min(k, self.index.ntotal)
         k = max(k, n_results)  # At least n_results
         
         distances, indices = self.index.search(query_array, k)
         
-        # Format results
+        # Format results with scores
         results = []
         for i, idx in enumerate(indices[0]):
             if idx == -1:  # FAISS returns -1 for invalid indices
@@ -150,28 +154,57 @@ class FAISSCourseDB:
             
             metadata = self.metadata[idx]
             
-            # Apply filters
+            # Apply filters (STRING EQUALITY - semantic değil)
+            if filters:
+                # course_code exact match
+                if 'course_code' in filters:
+                    filter_code = filters['course_code'].replace(' ', '').upper()
+                    chunk_code = metadata.get('course_code', '').replace(' ', '').upper()
+                    if filter_code != chunk_code:
+                        continue
+                
+                # department exact match
+                if 'department' in filters:
+                    if metadata.get('department', '') != filters['department']:
+                        continue
+                
+                # section exact match
+                if 'section' in filters:
+                    if metadata.get('section', '').lower() != filters['section'].lower():
+                        continue
+            
+            # Apply legacy filters
             if department_filter and metadata.get('department') != department_filter:
                 continue
             if course_type_filter and metadata.get('type') != course_type_filter:
                 continue
             
-            # Get text from metadata or reconstruct
+            # Get text from metadata
             text = metadata.get('text', '')
+            
+            # Calculate similarity score (lower distance = higher similarity)
+            similarity_score = 1.0 / (1.0 + float(distances[0][i]))
+            
+            # Section boost (ÇÖZÜM B: Section-aware retrieval)
+            if boost_section:
+                chunk_section = metadata.get('section', '').lower()
+                if chunk_section == boost_section.lower():
+                    similarity_score *= 1.5  # Boost matching sections
             
             result = {
                 'id': f"chunk_{idx}",
                 'text': text,
                 'metadata': metadata,
-                'distance': float(distances[0][i])
+                'distance': float(distances[0][i]),
+                'similarity': similarity_score
             }
             results.append(result)
-            
-            # Stop if we have enough results
-            if len(results) >= n_results:
-                break
         
-        return results
+        # Sort by similarity (highest first)
+        results.sort(key=lambda x: x['similarity'], reverse=True)
+        
+        # Return top n_results
+        return results[:n_results]
     
     def save(self):
         """Save index and metadata to disk"""

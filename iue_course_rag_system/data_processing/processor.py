@@ -165,11 +165,12 @@ class CourseDataProcessor:
             if department:
                 metadata_text += f" Department: {department}."
             
+            # Metadata chunk - credits bilgisi için önemli
             metadata_chunk = {
                 'text': metadata_text,
                 'chunk_index': 0,
                 **base_metadata,
-                'section': 'course_metadata'
+                'section': 'credits'  # Standardize: credits section
             }
             chunks.append(metadata_chunk)
         
@@ -178,7 +179,7 @@ class CourseDataProcessor:
         if objectives:
             obj_chunks = self.split_into_chunks(
                 objectives,
-                {**base_metadata, 'section': 'objectives'}
+                {**base_metadata, 'section': 'objectives'}  # Standardize: lowercase
             )
             chunks.extend(obj_chunks)
         
@@ -187,7 +188,7 @@ class CourseDataProcessor:
         if description:
             desc_chunks = self.split_into_chunks(
                 description,
-                {**base_metadata, 'section': 'description'}
+                {**base_metadata, 'section': 'description'}  # Standardize: lowercase
             )
             chunks.extend(desc_chunks)
         
@@ -202,39 +203,42 @@ class CourseDataProcessor:
             if lo_text:
                 lo_chunks = self.split_into_chunks(
                     lo_text,
-                    {**base_metadata, 'section': 'learning_outcomes'}
+                    {**base_metadata, 'section': 'learning_outcomes'}  # Standardize: lowercase
                 )
                 chunks.extend(lo_chunks)
         
-        # Process weekly topics
+        # Process weekly topics - HER HAFTA AYRI CHUNK (ÇÖZÜM: Weekly topics ayrı chunk)
         weekly_topics = course.get('weekly_topics', [])
         if weekly_topics:
-            topics_text = ""
+            # Her hafta için ayrı chunk oluştur
             for topic in weekly_topics:
                 if isinstance(topic, dict):
                     week = topic.get('week', '')
                     topic_text = topic.get('topic', '')
                     materials = topic.get('required_materials', '')
+                    
                     if topic_text:
-                        topics_text += f"Week {week}: {topic_text}"
+                        # Her hafta için ayrı chunk
+                        week_text = f"Week {week}: {topic_text}"
                         if materials:
-                            topics_text += f" Required Materials: {materials}"
-                        topics_text += ". "
-            
-            if topics_text:
-                topics_text = self.normalize_text(topics_text)
-                topics_chunks = self.split_into_chunks(
-                    topics_text,
-                    {**base_metadata, 'section': 'weekly_topics'}
-                )
-                chunks.extend(topics_chunks)
+                            week_text += f" Required Materials: {materials}"
+                        
+                        week_text = self.normalize_text(week_text)
+                        if week_text:
+                            week_chunk = {
+                                'text': week_text,
+                                'chunk_index': int(week) if week.isdigit() else 0,
+                                **base_metadata,
+                                'section': 'weekly_topics'  # Standardize: lowercase
+                            }
+                            chunks.append(week_chunk)
         
         # Process prerequisites
         prerequisites = self.normalize_text(course.get('prerequisites', ''))
         if prerequisites:
             prereq_chunks = self.split_into_chunks(
                 prerequisites,
-                {**base_metadata, 'section': 'prerequisites'}
+                {**base_metadata, 'section': 'prerequisites'}  # Standardize: lowercase
             )
             chunks.extend(prereq_chunks)
         
@@ -271,7 +275,7 @@ class CourseDataProcessor:
                 assessment_text = self.normalize_text(assessment_text)
                 assessment_chunks = self.split_into_chunks(
                     assessment_text,
-                    {**base_metadata, 'section': 'assessment'}
+                    {**base_metadata, 'section': 'assessment'}  # Standardize: lowercase
                 )
                 chunks.extend(assessment_chunks)
         
@@ -298,7 +302,7 @@ class CourseDataProcessor:
                 workload_text = self.normalize_text(workload_text)
                 workload_chunks = self.split_into_chunks(
                     workload_text,
-                    {**base_metadata, 'section': 'ects_workload'}
+                    {**base_metadata, 'section': 'ects_workload'}  # Standardize: lowercase
                 )
                 chunks.extend(workload_chunks)
         
@@ -324,7 +328,7 @@ class CourseDataProcessor:
             available_text = self.normalize_text(available_text)
             available_chunks = self.split_into_chunks(
                 available_text,
-                {**base_metadata, 'section': 'available_courses'}
+                {**base_metadata, 'section': 'available_courses'}  # Standardize: lowercase
             )
             chunks.extend(available_chunks)
             
@@ -349,7 +353,7 @@ class CourseDataProcessor:
                         'type': 'Elective',  # SFL/ELEC/POOL nested courses are typically elective
                         'ects': nested_ects,
                         'local_credits': nested_local,
-                        'section': 'nested_course',
+                        'section': 'nested_course',  # Standardize: lowercase
                         'parent_course': course_code  # Track which parent course this belongs to
                     }
                     

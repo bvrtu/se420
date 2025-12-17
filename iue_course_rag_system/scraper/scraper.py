@@ -599,15 +599,15 @@ class IUECourseScraper:
                             if scraped_course_codes is not None:
                                 scraped_course_codes.add(elective_code)
                             if course_detail.get('course_name'):
-                            elective.update({
-                                'objectives': course_detail.get('objectives', ''),
-                                'description': course_detail.get('description', ''),
-                                'weekly_topics': course_detail.get('weekly_topics', []),
-                                'learning_outcomes': course_detail.get('learning_outcomes', []),
-                                'assessment': course_detail.get('assessment', {}),
-                                'ects_workload': course_detail.get('ects_workload', {}),
-                                'prerequisites': course_detail.get('prerequisites', '')
-                            })
+                                elective.update({
+                                    'objectives': course_detail.get('objectives', ''),
+                                    'description': course_detail.get('description', ''),
+                                    'weekly_topics': course_detail.get('weekly_topics', []),
+                                    'learning_outcomes': course_detail.get('learning_outcomes', []),
+                                    'assessment': course_detail.get('assessment', {}),
+                                    'ects_workload': course_detail.get('ects_workload', {}),
+                                    'prerequisites': course_detail.get('prerequisites', '')
+                                })
                     
                     # Check if this elective course is already added (avoid duplicates)
                     elec_code = elective.get('course_code', '')
@@ -1115,7 +1115,7 @@ class IUECourseScraper:
                     
                     # Check for duplicates before adding
                     if not any(c.get('course_code') == code for c in nested_courses):
-                    nested_courses.append(nested_course)
+                        nested_courses.append(nested_course)
         
         # Get minimum ECTS requirement
         min_ects = None
@@ -1977,11 +1977,11 @@ class IUECourseScraper:
                 # POOL courses are already extracted with nested courses
                 detail = {}
             elif course.get('detail_url'):
-            detail = self.scrape_course_detail(
-                course['detail_url'],
+                detail = self.scrape_course_detail(
+                    course['detail_url'],
                     course_code,
                     scraped_course_codes
-            )
+                )
             
             # Merge curriculum info with detail info
             merged_course = {**course, **detail}
