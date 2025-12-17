@@ -73,7 +73,8 @@ class RAGPipeline:
                  department_filter: Optional[str] = None,
                  course_type_filter: Optional[str] = None,
                  filters: Optional[Dict] = None,
-                 boost_section: Optional[str] = None) -> List[Dict]:
+                 boost_section: Optional[str] = None,
+                 strict: bool = False) -> List[Dict]:
         """
         Retrieve relevant chunks for a query
         
@@ -286,9 +287,9 @@ Answer:"""
         # Görsel: "Bu bir 'optimizasyon' değil, Bu bir akademik zorunluluk"
         code = course_code  # extract_course_code(query) zaten yapıldı
         
-        # ÇÖZÜM B: SECTION-AWARE RETRIEVAL - Görsel: Section mapping düzeltmesi
-        # Görsel: "haftalık" → "objectives" YANLIŞ, "weekly_topics" DOĞRU
-        # Görsel: "kredi" → "prerequisites" YANLIŞ, "credits" DOĞRU
+        # Görsel (2): Section-aware retrieval hâlâ "soft"
+        # Görsel: "sadece boost ediliyorsa ❌" ve "ama zorlanmıyorsa ❌"
+        # Görsel: "Haftalık konu sorusu, objectives'tan cevaplanabilir" → Hard filter olmalı
         section = None
         query_lower = query.lower()
         if "kredi" in query_lower or "credit" in query_lower or "ects" in query_lower:
@@ -296,35 +297,54 @@ Answer:"""
         elif "haftalık" in query_lower or "weekly" in query_lower:
             section = "weekly_topics"  # Görsel: "objectives" değil, "weekly_topics" olmalı
         
-        # Step 1: Retrieve with HARD FILTER (Görsel: Garanti olmalı)
-        # Görsel: "if course_code: filters={"course_code": course_code}" zorunlu
-        if code:
-            # Görsel: Course code varsa MUTLAKA filter uygula (akademik zorunluluk)
+        # Görsel: Section varsa, filters'a ekle (hard filter, sadece boost değil)
+        if section and code:
+            # Course code + section hard filter
+            filters = {"course_code": code, "section": section}
+        elif code:
+            # Sadece course code filter
             filters = {"course_code": code}
+        elif section:
+            # Sadece section filter (hard filter)
+            filters = {"section": section}
+        else:
+            filters = None
+        
+        # Görsel (1): Course code filtering hala "hard guarantee" değil
+        # Görsel: "Course code varsa → başka ders ASLA gelmemeli"
+        # Görsel: "strict=True" parametresi olmalı
+        # Görsel: "filters_if_any" optional ise akademik risk → Hard filter GARANTİ
+        if filters:
+            # Görsel: Course code VEYA section varsa MUTLAKA filter uygula (akademik zorunluluk)
             retrieved_chunks = self.retrieve(
                 query=enhanced_query,
                 n_results=n_results * 2,
                 department_filter=department_filter,
                 course_type_filter=course_type_filter,
                 filters=filters,  # Görsel: Hard filter GARANTİ
-                boost_section=section
+                boost_section=section,
+                strict=True  # Görsel: "Strict" yoksa, bu garanti yoktur
             )
         else:
-            # Course code yoksa normal search
+            # Course code ve section yoksa normal search
             retrieved_chunks = self.retrieve(
                 query=enhanced_query,
                 n_results=n_results,
                 department_filter=department_filter,
                 course_type_filter=course_type_filter,
                 filters=None,
-                boost_section=section
+                boost_section=section,
+                strict=False
             )
         
-        # ÇÖZÜM C: DATA-NOT-FOUND GUARD - Görsel: "Veri yok" guard hâlâ zayıf
-        # Görsel: "Benzerlik düşük ama LLM cevap üretiyor" → Kod seviyesinde kesin guard
+        # Görsel (3): "Veri yok" guard hâlâ %100 değil
+        # Görsel: "az context ile tahmin yapmaya devam eder" → Bu da hallucination kapısıdır
         max_similarity = max((d.get('similarity', 0) for d in retrieved_chunks), default=0) if retrieved_chunks else 0
-        if not retrieved_chunks or max_similarity < 0.30:
-            # Görsel: Similarity düşükse LLM'e gitmeden kesin guard
+        min_chunks_for_context = 3  # Görsel: Az context ile LLM tahmin yapmaya devam eder
+        
+        if not retrieved_chunks or max_similarity < 0.30 or len(retrieved_chunks) < min_chunks_for_context:
+            # Görsel: Similarity düşükse VEYA az context varsa LLM'e gitmeden kesin guard
+            logger.warning(f"Guard triggered: chunks={len(retrieved_chunks)}, max_similarity={max_similarity:.3f}")
             return {
                 'query': query,
                 'retrieved_chunks': [],
@@ -336,27 +356,53 @@ Answer:"""
         # Step 2: Generate context
         context = self.generate_context(retrieved_chunks)
         
+        # Görsel: Context çok kısa ise (az context) yine guard
+        if len(context.strip()) < 100:  # Çok kısa context
+            logger.warning(f"Context too short ({len(context)} chars), returning no_data_answer")
+            return {
+                'query': query,
+                'retrieved_chunks': retrieved_chunks,
+                'context': context,
+                'response': build_no_data_answer(),
+                'num_results': len(retrieved_chunks)
+            }
+        
         # Step 3: Generate response
         response = self.generate_response(query, context)
         
         # Görsel: TR+EN format assertion (Kod seviyesinde garanti)
         # Görsel: "assert 'ANSWER (TR)' in answer" ve "assert 'ANSWER (EN)' in answer"
         # Görsel: "LLM 'unutursa' sistem çöker" → Kod seviyesinde kontrol
+        # Görsel: "Prompt'a güvenmek yeterli değil" → Kod seviyesinde garanti
         response_upper = response.upper()
-        if "ANSWER (TR)" not in response_upper or "ANSWER (EN)" not in response_upper:
+        
+        # Görsel: Kod seviyesinde assertion (main.py'de değil, burada)
+        has_tr = "ANSWER (TR)" in response_upper or "CEVAP (TR)" in response_upper
+        has_en = "ANSWER (EN)" in response_upper or "CEVAP (EN)" in response_upper
+        
+        if not has_tr or not has_en:
             # LLM format'ı unuttuysa, format_answer ile zorla
             logger.warning("LLM response does not contain TR+EN format, enforcing format...")
             # Try to extract TR and EN from response
-            tr_match = re.search(r'ANSWER\s*\(TR\)[:\-]*\s*(.*?)(?=ANSWER\s*\(EN\)|$)', response, re.IGNORECASE | re.DOTALL)
-            en_match = re.search(r'ANSWER\s*\(EN\)[:\-]*\s*(.*?)$', response, re.IGNORECASE | re.DOTALL)
+            tr_match = re.search(r'(?:ANSWER|CEVAP)\s*\(TR\)[:\-]*\s*(.*?)(?=(?:ANSWER|CEVAP)\s*\(EN\)|$)', response, re.IGNORECASE | re.DOTALL)
+            en_match = re.search(r'(?:ANSWER|CEVAP)\s*\(EN\)[:\-]*\s*(.*?)$', response, re.IGNORECASE | re.DOTALL)
             
             if tr_match and en_match:
                 tr_text = tr_match.group(1).strip()
                 en_text = en_match.group(1).strip()
                 response = format_answer(tr_text, en_text)
             else:
-                # Fallback: Use same text for both
+                # Fallback: Use same text for both (LLM tek dil döndüyse)
+                logger.warning("LLM returned single language, duplicating for TR+EN format")
                 response = format_answer(response, response)
+        
+        # Görsel: Final assertion (kod seviyesinde garanti)
+        # Görsel: "LLM bir gün tek dil döner ve sistem 'sessizce bozulur'" → Assert ile önle
+        final_check = response.upper()
+        assert "ANSWER (TR)" in final_check or "CEVAP (TR)" in final_check, \
+            "TR section missing in response - system guarantee failed"
+        assert "ANSWER (EN)" in final_check or "CEVAP (EN)" in final_check, \
+            "EN section missing in response - system guarantee failed"
         
         return {
             'query': query,

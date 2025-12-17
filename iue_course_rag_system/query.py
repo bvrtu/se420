@@ -89,15 +89,20 @@ def interactive_query(rag_pipeline):
                 print("  - How many elective courses are in the final year?")
                 continue
             
-            # ÇÖZÜM: Course code detection (ZORUNLU)
+            # Görsel: Course code extraction zorunlu olarak pipeline'a aktarılmalı
+            # Görsel: "course_code = extract_course_code(query)" ve "rag_pipeline.run(query, course_code=course_code)" akışı kesin olmalı
             course_code = extract_course_code(query)
             
-            # Run query
+            # Görsel: course_code None olsa bile bilinçli işlenmeli
+            # Run query - course_code zorunlu parametre olarak gönder (garanti)
             print("\nProcessing query...")
             if course_code:
                 print(f"Detected course code: {course_code}")
+            else:
+                print("No course code detected in query")
             
-            result = rag_pipeline.query(query, n_results=15, course_code=course_code)
+            # Görsel: Pipeline'a zorunlu aktarım (garanti mekanizması)
+            result = rag_pipeline.query(query, n_results=15, course_code=course_code)  # course_code zorunlu parametre
             
             # Display results
             print("\n" + "-"*60)
@@ -156,12 +161,15 @@ def main():
     
     # Run query
     if args.query:
-        # ÇÖZÜM: Course code detection (ZORUNLU)
+        # Görsel: Course code extraction zorunlu olarak pipeline'a aktarılmalı
         course_code = extract_course_code(args.query)
         if course_code:
             print(f"Detected course code: {course_code}")
+        else:
+            print("No course code detected in query")
         
-        result = rag_pipeline.query(args.query, n_results=15, course_code=course_code)
+        # Görsel: Pipeline'a zorunlu aktarım (garanti mekanizması)
+        result = rag_pipeline.query(args.query, n_results=15, course_code=course_code)  # course_code zorunlu parametre
         print("\n" + "="*60)
         print("QUERY:", args.query)
         print("="*60)

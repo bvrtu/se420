@@ -104,7 +104,8 @@ class FAISSCourseDB:
                department_filter: Optional[str] = None,
                course_type_filter: Optional[str] = None,
                filters: Optional[Dict] = None,
-               boost_section: Optional[str] = None) -> List[Dict]:
+               boost_section: Optional[str] = None,
+               strict: bool = False) -> List[Dict]:
         """
         Search for similar chunks
         
@@ -134,50 +135,78 @@ class FAISSCourseDB:
             logger.error(f"Query dimension mismatch: {query_array.shape[1]} != {self.dimension}")
             return []
         
-        # Search (get more results for better coverage)
-        # If filtering, get more results to ensure we have enough after filtering
-        k = min(n_results * 5, self.index.ntotal) if (department_filter or course_type_filter or filters) else n_results * 2
+        # Görsel: YANLIŞ SIRA - Similarity search → Sonra metadata kontrolü
+        # Görsel: DOĞRU SIRA - Metadata ile daralt (course_code, section) → Sonra similarity
+        # Görsel: "Bu fark, projeni 'çalışıyor'dan 'akademik olarak doğru'ya taşır"
+        
+        # ÖNCE: Metadata ile daralt (Görsel: Doğru sıra)
+        candidate_indices = set()
+        if filters or department_filter or course_type_filter:
+            # Görsel: Önce metadata ile daralt
+            for idx in range(len(self.metadata)):
+                metadata = self.metadata[idx]
+                
+                # Apply filters (STRING EQUALITY - semantic değil)
+                if filters:
+                    # course_code exact match
+                    if 'course_code' in filters:
+                        filter_code = filters['course_code'].replace(' ', '').upper()
+                        chunk_code = metadata.get('course_code', '').replace(' ', '').upper()
+                        if filter_code != chunk_code:
+                            continue
+                    
+                    # department exact match
+                    if 'department' in filters:
+                        if metadata.get('department', '') != filters['department']:
+                            continue
+                    
+                    # section exact match (Görsel: Section hard filter)
+                    if 'section' in filters:
+                        if metadata.get('section', '').lower() != filters['section'].lower():
+                            continue
+                
+                # Legacy filters
+                if department_filter and metadata.get('department') != department_filter:
+                    continue
+                if course_type_filter and metadata.get('type') != course_type_filter:
+                    continue
+                
+                candidate_indices.add(idx)
+        else:
+            # Filter yoksa tüm index'ler candidate
+            candidate_indices = set(range(len(self.metadata)))
+        
+        # Görsel: Strict mode - Eğer filters varsa ve strict=True ise, sadece filtered results
+        if strict and filters and not candidate_indices:
+            logger.warning(f"Strict mode: No candidates found for filters {filters}")
+            return []
+        
+        # SONRA: Similarity search (Görsel: Doğru sıra - metadata daraltıldıktan sonra)
+        # FAISS'te tüm index'te search yap, ama sonuçları candidate_indices ile filtrele
+        k = min(n_results * 10, self.index.ntotal) if candidate_indices else n_results * 2
         k = min(k, self.index.ntotal)
-        k = max(k, n_results)  # At least n_results
+        k = max(k, n_results)
         
         distances, indices = self.index.search(query_array, k)
         
-        # Format results with scores
+        # Format results with scores - SADECE candidate_indices içindekileri al
         results = []
+        seen_indices = set()
         for i, idx in enumerate(indices[0]):
-            if idx == -1:  # FAISS returns -1 for invalid indices
+            if idx == -1 or idx in seen_indices:
                 continue
+            
+            # Görsel: Metadata filter'ı geçmeyenleri atla (ÖNCE metadata ile daralt)
+            if idx not in candidate_indices:
+                continue
+            
+            seen_indices.add(idx)
             
             if idx >= len(self.metadata):
                 logger.warning(f"Index {idx} out of range for metadata")
                 continue
             
             metadata = self.metadata[idx]
-            
-            # Apply filters (STRING EQUALITY - semantic değil)
-            if filters:
-                # course_code exact match
-                if 'course_code' in filters:
-                    filter_code = filters['course_code'].replace(' ', '').upper()
-                    chunk_code = metadata.get('course_code', '').replace(' ', '').upper()
-                    if filter_code != chunk_code:
-                        continue
-                
-                # department exact match
-                if 'department' in filters:
-                    if metadata.get('department', '') != filters['department']:
-                        continue
-                
-                # section exact match
-                if 'section' in filters:
-                    if metadata.get('section', '').lower() != filters['section'].lower():
-                        continue
-            
-            # Apply legacy filters
-            if department_filter and metadata.get('department') != department_filter:
-                continue
-            if course_type_filter and metadata.get('type') != course_type_filter:
-                continue
             
             # Get text from metadata
             text = metadata.get('text', '')

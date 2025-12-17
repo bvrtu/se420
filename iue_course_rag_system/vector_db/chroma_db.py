@@ -117,7 +117,8 @@ class ChromaCourseDB:
                department_filter: Optional[str] = None,
                course_type_filter: Optional[str] = None,
                filters: Optional[Dict] = None,
-               boost_section: Optional[str] = None) -> List[Dict]:
+               boost_section: Optional[str] = None,
+               strict: bool = False) -> List[Dict]:
         """
         Search for similar chunks (Görsel: Metadata filtreleme eklendi)
         
@@ -132,7 +133,11 @@ class ChromaCourseDB:
         Returns:
             List of similar chunks with metadata
         """
-        # Build where clause for filtering (Görsel: course_code filter eklendi)
+        # Görsel: YANLIŞ SIRA - Similarity search → Sonra metadata kontrolü
+        # Görsel: DOĞRU SIRA - Metadata ile daralt (course_code, section) → Sonra similarity
+        # ChromaDB'de where clause ile önce metadata filtreleme yapılır (doğru sıra)
+        
+        # ÖNCE: Metadata ile daralt (Görsel: Doğru sıra)
         where_clause = {}
         if filters:
             # course_code exact match (STRING EQUALITY - semantic değil)
@@ -145,7 +150,7 @@ class ChromaCourseDB:
             if 'department' in filters:
                 where_clause['department'] = filters['department']
             
-            # section exact match
+            # section exact match (Görsel: Section hard filter)
             if 'section' in filters:
                 where_clause['section'] = {'$regex': f'^{re.escape(filters["section"].lower())}$', '$options': 'i'}
         
@@ -155,7 +160,12 @@ class ChromaCourseDB:
         if course_type_filter:
             where_clause['type'] = course_type_filter
         
-        # Search
+        # Görsel: Strict mode
+        if strict and filters and not where_clause:
+            logger.warning(f"Strict mode: No where clause for filters {filters}")
+            return []
+        
+        # SONRA: Similarity search (Görsel: Doğru sıra - metadata daraltıldıktan sonra)
         results = self.collection.query(
             query_embeddings=[query_embedding],
             n_results=n_results * 2 if filters else n_results,  # Get more if filtering
