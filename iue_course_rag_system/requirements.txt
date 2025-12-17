@@ -1,0 +1,29 @@
+# Core Web Scraping Dependencies
+requests>=2.31.0
+beautifulsoup4>=4.12.0
+lxml>=4.9.0
+tqdm>=4.66.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Embeddings (Free - Sentence-BERT)
+sentence-transformers>=2.2.0
+torch>=2.0.0
+
+# Vector Database (Free - FAISS, more reliable than ChromaDB)
+faiss-cpu>=1.7.4
+# Optional: ChromaDB (if you prefer, but has dependency issues on some systems)
+# chromadb>=0.4.0
+
+# RAG Pipeline - Free LLM Options
+# Option 1: Ollama (recommended - free, local, fast)
+ollama>=0.1.0
+
+# Option 2: HuggingFace Transformers (fallback - free, but requires more memory)
+transformers>=4.30.0
+accelerate>=0.20.0
+
+# Utilities
+python-dotenv>=1.0.0
