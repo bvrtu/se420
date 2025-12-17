@@ -100,6 +100,59 @@ class FAISSCourseDB:
         # Save after adding
         self.save()
     
+    def search_by_metadata(self, filters: Dict, n_results: int = 5) -> List[Dict]:
+        """
+        Görsel: Exact metadata lookup - Önce exact match (course_code + section)
+        Görsel: "1) Metadata ile önce daralt, sonra similarity"
+        Görsel: "Exact metadata lookup (course_code+section) → önce"
+        
+        Args:
+            filters: Dictionary with metadata filters (course_code, section, department, etc.)
+            n_results: Number of results to return
+            
+        Returns:
+            List of chunks matching exact metadata filters
+        """
+        if not filters:
+            return []
+        
+        results = []
+        for idx in range(len(self.metadata)):
+            metadata = self.metadata[idx]
+            match = True
+            
+            # course_code exact match (normalized)
+            if 'course_code' in filters:
+                filter_code = filters['course_code'].replace(' ', '').upper()
+                chunk_code = metadata.get('course_code', '').replace(' ', '').upper()
+                if filter_code != chunk_code:
+                    match = False
+            
+            # section exact match
+            if match and 'section' in filters:
+                chunk_section = metadata.get('section', '').lower().strip()
+                filter_section = filters['section'].lower().strip()
+                if chunk_section != filter_section:
+                    match = False
+            
+            # department exact match
+            if match and 'department' in filters:
+                if metadata.get('department', '') != filters['department']:
+                    match = False
+            
+            if match:
+                text = metadata.get('text', '')
+                result = {
+                    'id': f"chunk_{idx}",
+                    'text': text,
+                    'metadata': metadata,
+                    'distance': 0.0,  # Exact match, no distance
+                    'similarity': 1.0  # Perfect match
+                }
+                results.append(result)
+        
+        return results[:n_results]
+    
     def search(self, query_embedding: List[float], n_results: int = 5,
                department_filter: Optional[str] = None,
                course_type_filter: Optional[str] = None,

@@ -56,7 +56,8 @@ def load_rag_pipeline(data_dir: str = "data", llm_provider: str = "ollama", mode
         vector_db=vector_db,
         embedder=embedder,
         llm_provider=llm_provider,
-        model_name=model_name
+        model_name=model_name,
+        data_dir=data_dir  # Görsel: Dataset fallback için data_dir ekle
     )
     
     return rag_pipeline

@@ -34,7 +34,7 @@ except ImportError:
 class RAGPipeline:
     """RAG Pipeline for course intelligence and comparison"""
     
-    def __init__(self, vector_db, embedder, llm_provider: str = "ollama", model_name: str = "llama3.2"):
+    def __init__(self, vector_db, embedder, llm_provider: str = "ollama", model_name: str = "llama3.2", data_dir: str = "data"):
         """
         Initialize RAG Pipeline
         
@@ -43,11 +43,14 @@ class RAGPipeline:
             embedder: CourseEmbedder instance
             llm_provider: LLM provider ("ollama" or "huggingface")
             model_name: Model name (e.g., "llama3.2" for Ollama, "microsoft/DialoGPT-medium" for HuggingFace)
+            data_dir: Data directory path for dataset fallback
         """
         self.vector_db = vector_db
         self.embedder = embedder
         self.llm_provider = llm_provider
         self.model_name = model_name
+        self.data_dir = Path(data_dir)
+        self._dataset_cache = None  # Cache for JSON dataset
         
         # Initialize LLM
         if llm_provider == "ollama":
@@ -99,7 +102,8 @@ class RAGPipeline:
             department_filter=department_filter,
             course_type_filter=course_type_filter,
             filters=filters,
-            boost_section=boost_section
+            boost_section=boost_section,
+            strict=strict
         )
         
         return results
@@ -367,59 +371,59 @@ Answer:"""
         else:
             filters = None
         
-        # Görsel (1): Course code filtering hala "hard guarantee" değil
-        # Görsel: "Course code varsa → başka ders ASLA gelmemeli"
-        # Görsel: "strict=True" parametresi olmalı
-        # Görsel: "filters_if_any" optional ise akademik risk → Hard filter GARANTİ
+        # Görsel: ÇÖZÜM - Exact metadata lookup önce, sonra similarity
+        # Görsel: "1) Metadata ile önce daralt, sonra similarity"
+        # Görsel: "Exact metadata lookup (course_code+section) → önce"
         mark_as_partial = False  # Görsel: Fallback mekanizması için flag
-        if filters:
-            # Görsel: Course code VEYA section varsa MUTLAKA filter uygula (akademik zorunluluk)
+        retrieved_chunks = []
+        
+        # Görsel: ÖNCE - Exact metadata lookup (course_code + section)
+        if filters and code:
+            # Görsel: "docs = db.search_by_metadata({ 'course_code': course_code, 'section': section })"
+            exact_chunks = self.vector_db.search_by_metadata(filters, n_results=n_results)
+            if exact_chunks:
+                logger.info(f"Exact metadata lookup found {len(exact_chunks)} chunks for {filters}")
+                retrieved_chunks = exact_chunks
+            else:
+                # Görsel: "if not docs: docs = db.search_by_metadata({ 'course_code': course_code })"
+                # Fallback: Sadece course_code ile arama (section filter'ı kaldır)
+                if requested_section:
+                    logger.info(f"Exact section '{requested_section}' not found for {code}, trying fallback: course_code only")
+                    fallback_filters = {"course_code": code}
+                    exact_chunks = self.vector_db.search_by_metadata(fallback_filters, n_results=n_results * 2)
+                    if exact_chunks:
+                        retrieved_chunks = exact_chunks
+                        mark_as_partial = True
+                        logger.info(f"Fallback successful: found {len(retrieved_chunks)} chunks for {code}")
+        
+        # Görsel: SONRA - Similarity search (eğer exact lookup sonuç vermezse)
+        if not retrieved_chunks:
+            # Görsel: "Similarity search → sonra"
             retrieved_chunks = self.retrieve(
                 query=enhanced_query,
-                n_results=n_results * 2,
+                n_results=n_results * 2 if filters else n_results,
                 department_filter=department_filter,
                 course_type_filter=course_type_filter,
                 filters=filters,  # Görsel: Hard filter GARANTİ
                 boost_section=section,
-                strict=True  # Görsel: "Strict" yoksa, bu garanti yoktur
+                strict=True if filters else False
             )
-            
-            # Görsel: KESİN ÇÖZÜM - Fallback mekanizması
-            # Görsel: "Önce exact section, yoksa fallback"
-            # Görsel: "chunks = search(course_code, requested_section); if not chunks: chunks = search(course_code, any_section)"
-            if not retrieved_chunks and code and requested_section:
-                # Exact section bulunamadı, fallback: any_section'dan arama
-                logger.info(f"Exact section '{requested_section}' not found for {code}, trying fallback: any_section")
-                fallback_filters = {"course_code": code}  # Section filter'ı kaldır
-                retrieved_chunks = self.retrieve(
-                    query=enhanced_query,
-                    n_results=n_results * 2,
-                    department_filter=department_filter,
-                    course_type_filter=course_type_filter,
-                    filters=fallback_filters,
-                    boost_section=None,
-                    strict=True
-                )
-                if retrieved_chunks:
-                    mark_as_partial = True  # Görsel: "mark_answer_as_partial = True"
-                    logger.info(f"Fallback successful: found {len(retrieved_chunks)} chunks for {code}")
-        else:
+        
+        # Eğer hala chunk yoksa, normal search yap (intent detection için)
+        if not retrieved_chunks:
             # Course code ve section yoksa normal search
             # Görsel: General query guard - Course code yoksa ve intent belirsizse, çok sıkı filtreleme
             # Görsel: "if retrieved_chunks < MIN_THRESHOLD: DO NOT call LLM, return 'Dataset-based answer not available'"
             if not code and intent_detected in ["core_courses", "important_courses", "mandatory_courses"]:
                 # Görsel: Core courses için section filter ekle
                 # Görsel: "restrict retrieval to: department == 'Software Engineering' AND section in ['description', 'objectives']"
-                # Section filter'ı filters'a ekle (description veya objectives)
-                # Not: FAISS/ChromaDB'de section filter'ı "description" veya "objectives" olarak uygulayamayız direkt,
-                # ama boost_section ile öncelik verebiliriz. Daha iyi çözüm: retrieve sonrası filtreleme
                 retrieved_chunks = self.retrieve(
                     query=enhanced_query,
                     n_results=n_results * 2,  # Daha fazla sonuç al, sonra filtrele
                     department_filter=department_filter,  # Görsel: Department filter zorunlu
                     course_type_filter=course_type_filter,
                     filters=None,
-                    boost_section=None,  # Section boost yok, retrieve sonrası filtreleme yapacağız
+                    boost_section=None,
                     strict=False
                 )
                 # Görsel: Section filter - sadece description ve objectives
@@ -458,6 +462,7 @@ Answer:"""
                         strict=False
                     )
             else:
+                # Normal search (code var ama filters yok)
                 retrieved_chunks = self.retrieve(
                     query=enhanced_query,
                     n_results=n_results,
@@ -490,7 +495,26 @@ Answer:"""
                     'num_results': len(retrieved_chunks)
                 }
         
+        # Görsel: Guard logic - Dataset fallback kontrolü
+        # Görsel: "3) Guard (Veri yok) sadece gerçekten hiçbir şey yoksa"
+        # Görsel: "if not docs or max_similarity < MIN_SIM: if dataset_has(course_code, section): use dataset value directly"
         if not retrieved_chunks or max_similarity < 0.30 or len(retrieved_chunks) < min_chunks_for_context:
+            # Görsel: Eğer JSON'da **credits** var ama retriever çağırmadıysa
+            if code and requested_section:
+                dataset_value = self._dataset_lookup(course_code=code, section=requested_section)
+                if dataset_value:
+                    logger.info(f"Dataset fallback found data for {code}, section={requested_section}")
+                    # Dataset'ten direkt değer kullan
+                    tr_content = dataset_value.get('tr', f"{code} dersinin {requested_section} bilgisi: {dataset_value.get('value', '')}")
+                    en_content = dataset_value.get('en', f"{code} course {requested_section} information: {dataset_value.get('value', '')}")
+                    return {
+                        'query': query,
+                        'retrieved_chunks': [],
+                        'context': '',
+                        'response': format_answer(tr_content, en_content),
+                        'num_results': 0
+                    }
+            
             # Görsel: Similarity düşükse VEYA az context varsa LLM'e gitmeden kesin guard
             logger.warning(f"Guard triggered: chunks={len(retrieved_chunks)}, max_similarity={max_similarity:.3f}")
             return {
@@ -671,6 +695,86 @@ Answer:"""
             'department_filter': department_filter,
             'course_type_filter': course_type_filter
         }
+    
+    def _load_dataset(self) -> Dict:
+        """
+        Görsel: Dataset fallback - JSON'dan direkt okuma
+        Görsel: "Dataset fallback → sadece gerçekten yoksa"
+        
+        Returns:
+            Dictionary with course data from JSON files
+        """
+        if self._dataset_cache is not None:
+            return self._dataset_cache
+        
+        dataset = {}
+        raw_data_path = self.data_dir / 'raw' / 'scraped_courses.json'
+        
+        if raw_data_path.exists():
+            try:
+                with open(raw_data_path, 'r', encoding='utf-8') as f:
+                    all_data = json.load(f)
+                
+                # Flatten department structure
+                for dept_key, courses in all_data.items():
+                    for course in courses:
+                        course_code = course.get('course_code', '').replace(' ', '').upper()
+                        if course_code:
+                            dataset[course_code] = course
+                
+                self._dataset_cache = dataset
+                logger.info(f"Loaded {len(dataset)} courses from dataset")
+            except Exception as e:
+                logger.warning(f"Error loading dataset: {e}")
+                self._dataset_cache = {}
+        else:
+            logger.warning(f"Dataset file not found: {raw_data_path}")
+            self._dataset_cache = {}
+        
+        return self._dataset_cache
+    
+    def _dataset_lookup(self, course_code: str, section: str) -> Optional[Dict]:
+        """
+        Görsel: Dataset lookup - JSON'dan direkt değer okuma
+        Görsel: "dataset_lookup(course_code='SE115', section='credits') -> found"
+        
+        Args:
+            course_code: Normalized course code (e.g., "SE115")
+            section: Section name (e.g., "credits", "weekly_topics")
+            
+        Returns:
+            Dictionary with value and TR+EN content, or None if not found
+        """
+        dataset = self._load_dataset()
+        normalized_code = course_code.replace(' ', '').upper()
+        
+        if normalized_code not in dataset:
+            return None
+        
+        course = dataset[normalized_code]
+        
+        # Görsel: Section'a göre değer bul
+        if section == "credits":
+            ects = course.get('ects')
+            local_credits = course.get('local_credits')
+            if ects is not None or local_credits is not None:
+                value = f"ECTS: {ects}, Local Credits: {local_credits}" if ects and local_credits else f"ECTS: {ects}" if ects else f"Local Credits: {local_credits}"
+                return {
+                    'value': value,
+                    'tr': f"{course_code} dersinin kredisi: {value}",
+                    'en': f"{course_code} course credits: {value}"
+                }
+        elif section == "weekly_topics":
+            weekly_topics = course.get('weekly_topics', [])
+            if weekly_topics:
+                topics_text = "\n".join([f"Week {t.get('week', '')}: {t.get('topic', '')}" for t in weekly_topics])
+                return {
+                    'value': topics_text,
+                    'tr': f"{course_code} dersinin haftalık konuları:\n{topics_text}",
+                    'en': f"{course_code} course weekly topics:\n{topics_text}"
+                }
+        
+        return None
     
     def _prioritize_by_course_code(self, chunks: List[Dict], course_code: str) -> List[Dict]:
         """Prioritize chunks with matching course code"""

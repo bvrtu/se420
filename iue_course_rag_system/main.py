@@ -173,7 +173,8 @@ def run_full_pipeline(
         vector_db=vector_db,
         embedder=embedder,
         llm_provider=llm_provider,
-        model_name=model_name
+        model_name=model_name,
+        data_dir=str(output_path)  # Görsel: Dataset fallback için data_dir ekle
     )
     
     logger.info("="*60)
