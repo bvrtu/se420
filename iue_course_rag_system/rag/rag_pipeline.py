@@ -182,14 +182,33 @@ class RAGPipeline:
             Generated response
         """
         # KESİN PROMPT (BİREBİR KULLAN) - Görseldeki template'e göre güncellendi
-        prompt = f"""You are an academic RAG system that MUST follow these rules:
+        # Görsel: Haftalık konular için tüm haftaları listele
+        weekly_topics_instruction = ""
+        if "haftalık" in query.lower() or "weekly" in query.lower():
+            weekly_topics_instruction = """
 
-1. Provide answers in BOTH Turkish and English.
+CRITICAL INSTRUCTIONS FOR WEEKLY TOPICS:
+- You MUST extract and list ALL weekly topics from the retrieved documents
+- Format each week as: "Week X: [topic description]" or "Hafta X: [topic description]"
+- Do NOT skip any weeks - list EVERY week found in the documents
+- Do NOT say "not found", "bulamadık", "Haftalık konuları bulamadık", "No weekly topics found", or any variation
+- If weekly topics exist in the documents, you MUST provide them
+- List them in chronological order (Week 1, Week 2, Week 3, etc.)
+- If multiple weeks have the same topic, list them separately
+- Use the EXACT information from the retrieved documents
+- Check the "Content:" section of each document for weekly topic information"""
+        
+        prompt = f"""You are an academic RAG system that MUST follow these rules STRICTLY:
+
+1. Provide answers in BOTH Turkish and English (TR+EN format is MANDATORY).
 2. The Turkish and English answers must contain EXACTLY the same factual content.
-3. Use ONLY the retrieved documents.
-4. If info is missing, say so clearly in both languages.
+3. Use ONLY the information from the retrieved documents below.
+4. If information is NOT in the documents, say "Bu ders için istenen bilgi veri setinde bulunmamaktadır" (TR) and "The requested information for this course is not available in the dataset" (EN).
+5. DO NOT make up or invent information.
+6. DO NOT say "not found", "bulamadık", "Haftalık konuları bulamadık", or "No weekly topics found" if the information EXISTS in the retrieved documents.
+7. If weekly topics are in the documents, you MUST list them ALL.{weekly_topics_instruction}
 
-OUTPUT FORMAT:
+OUTPUT FORMAT (MANDATORY):
 ------------------------------------------------------------
 ANSWER (TR)
 ------------------------------------------------------------
@@ -204,6 +223,8 @@ Retrieved Documents:
 {context}
 
 User Question: {query}
+
+IMPORTANT: Read the retrieved documents carefully. If the documents contain the requested information (especially weekly topics), you MUST provide it. Do NOT say "not found" if the information is in the documents.
 
 Answer:"""
         
@@ -282,6 +303,22 @@ Answer:"""
         # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görsel: Course code hard filter GARANTİ
         # Görsel: "Bu bir 'optimizasyon' değil, Bu bir akademik zorunluluk"
         code = course_code  # extract_course_code(query) zaten yapıldı - ÖNCE TANIMLA
+        
+        # Görsel: RAG TARAFINDA YAPILMASI GEREKEN TEK ŞEY
+        # Görsel: "if course_code not in dataset_courses: return NO_DATA_EXPLICIT"
+        # Görsel: Bu sayede SE420 scrape edilmeden uydurma yerine "Bu dersin bilgisi mevcut değil" denir
+        if code:
+            dataset = self._load_dataset()
+            normalized_code = code.replace(' ', '').upper()
+            if normalized_code not in dataset:
+                logger.warning(f"Course code {code} not found in dataset - returning no_data_answer immediately (LLM NOT CALLED)")
+                return {
+                    'query': query,
+                    'retrieved_chunks': [],
+                    'context': '',
+                    'response': build_no_data_answer(),
+                    'num_results': 0
+                }
         
         # Auto-detect filters from query if not provided
         if not department_filter or not course_type_filter:
@@ -377,21 +414,41 @@ Answer:"""
         mark_as_partial = False  # Görsel: Fallback mekanizması için flag
         retrieved_chunks = []
         
+        # Görsel: ÖNCE - Dataset fallback kontrolü (eğer exact lookup başarısız olursa kullanılacak)
+        # Görsel: Kredi bilgisi için önce dataset'te kontrol et
+        dataset_value = None
+        if code and requested_section:
+            dataset_value = self._dataset_lookup(course_code=code, section=requested_section)
+            if dataset_value:
+                logger.info(f"Dataset has exact data for {code}, section={requested_section}")
+        
         # Görsel: ÖNCE - Exact metadata lookup (course_code + section)
         if filters and code:
             # Görsel: "docs = db.search_by_metadata({ 'course_code': course_code, 'section': section })"
-            exact_chunks = self.vector_db.search_by_metadata(filters, n_results=n_results)
+            # Görsel: Haftalık konular için tüm chunk'ları al (her hafta ayrı chunk)
+            lookup_n_results = n_results * 20 if requested_section == "weekly_topics" else n_results
+            exact_chunks = self.vector_db.search_by_metadata(filters, n_results=lookup_n_results)
             if exact_chunks:
                 logger.info(f"Exact metadata lookup found {len(exact_chunks)} chunks for {filters}")
                 retrieved_chunks = exact_chunks
+                # Görsel: Eğer exact lookup başarılı olduysa, dataset'te de varsa partial answer ekleme
+                if dataset_value:
+                    logger.info(f"Exact lookup successful, dataset also has data - using exact lookup results")
             else:
                 # Görsel: "if not docs: docs = db.search_by_metadata({ 'course_code': course_code })"
                 # Fallback: Sadece course_code ile arama (section filter'ı kaldır)
                 if requested_section:
                     logger.info(f"Exact section '{requested_section}' not found for {code}, trying fallback: course_code only")
                     fallback_filters = {"course_code": code}
-                    exact_chunks = self.vector_db.search_by_metadata(fallback_filters, n_results=n_results * 2)
+                    # Görsel: Haftalık konular için tüm chunk'ları al
+                    fallback_n_results = n_results * 30 if requested_section == "weekly_topics" else n_results * 2
+                    exact_chunks = self.vector_db.search_by_metadata(fallback_filters, n_results=fallback_n_results)
                     if exact_chunks:
+                        # Görsel: Fallback'te section'a göre filtrele (weekly_topics için tüm haftaları al)
+                        if requested_section == "weekly_topics":
+                            # Sadece weekly_topics section'ından chunk'ları al (tüm haftalar)
+                            exact_chunks = [chunk for chunk in exact_chunks 
+                                          if chunk.get('metadata', {}).get('section', '').lower() == 'weekly_topics']
                         retrieved_chunks = exact_chunks
                         mark_as_partial = True
                         logger.info(f"Fallback successful: found {len(retrieved_chunks)} chunks for {code}")
@@ -417,22 +474,36 @@ Answer:"""
             if not code and intent_detected in ["core_courses", "important_courses", "mandatory_courses"]:
                 # Görsel: Core courses için section filter ekle
                 # Görsel: "restrict retrieval to: department == 'Software Engineering' AND section in ['description', 'objectives']"
+                # Görsel: Core courses için course_type='Mandatory' filter ekle ve genel dersleri (TURK, IUE, HIST) filtrele
                 retrieved_chunks = self.retrieve(
                     query=enhanced_query,
-                    n_results=n_results * 2,  # Daha fazla sonuç al, sonra filtrele
+                    n_results=n_results * 3,  # Daha fazla sonuç al, sonra filtrele
                     department_filter=department_filter,  # Görsel: Department filter zorunlu
-                    course_type_filter=course_type_filter,
+                    course_type_filter='Mandatory',  # Görsel: Sadece Mandatory courses (core courses)
                     filters=None,
                     boost_section=None,
                     strict=False
                 )
                 # Görsel: Section filter - sadece description ve objectives
+                # Görsel: Genel dersleri filtrele (TURK, IUE, HIST, ENG gibi genel eğitim dersleri)
                 if retrieved_chunks:
-                    filtered_chunks = [chunk for chunk in retrieved_chunks 
-                                     if chunk.get('metadata', {}).get('section', '').lower() in ['description', 'objectives']]
+                    filtered_chunks = []
+                    excluded_codes = ['TURK', 'IUE', 'HIST', 'ENG101', 'ENG102', 'ENG210', 'TURK100', 'IUE100', 'HIST100']  # Genel eğitim dersleri
+                    for chunk in retrieved_chunks:
+                        chunk_metadata = chunk.get('metadata', {})
+                        chunk_section = chunk_metadata.get('section', '').lower()
+                        chunk_code = chunk_metadata.get('course_code', '').upper()
+                        
+                        # Section filter: description veya objectives
+                        if chunk_section in ['description', 'objectives']:
+                            # Genel dersleri filtrele (TURK, IUE, HIST, ENG ile başlayanlar)
+                            is_general_course = any(chunk_code.startswith(excluded) for excluded in excluded_codes)
+                            if not is_general_course:
+                                filtered_chunks.append(chunk)
+                    
                     if filtered_chunks:
                         retrieved_chunks = filtered_chunks[:n_results]  # Top n_results
-                        logger.info(f"Section filter applied: {len(filtered_chunks)} chunks from description/objectives sections")
+                        logger.info(f"Section filter applied: {len(filtered_chunks)} chunks from description/objectives sections (excluded general courses: {excluded_codes})")
                     else:
                         # Eğer description/objectives yoksa, tüm section'ları kullan (fallback)
                         logger.warning(f"No chunks found in description/objectives sections, using all sections")
@@ -442,9 +513,9 @@ Answer:"""
                 if department_filter:
                     # Department filter ile arama yap
                     retrieved_chunks = self.retrieve(
-                        query=enhanced_query,
-                        n_results=n_results,
-                        department_filter=department_filter,
+                query=enhanced_query,
+                n_results=n_results,
+                department_filter=department_filter,
                         course_type_filter=course_type_filter,
                         filters=None,
                         boost_section=section,
@@ -461,12 +532,12 @@ Answer:"""
                         boost_section=section,
                         strict=False
                     )
-            else:
+        else:
                 # Normal search (code var ama filters yok)
-                retrieved_chunks = self.retrieve(
-                    query=enhanced_query,
-                    n_results=n_results,
-                    department_filter=department_filter,
+            retrieved_chunks = self.retrieve(
+                query=enhanced_query,
+                n_results=n_results,
+                department_filter=department_filter,
                     course_type_filter=course_type_filter,
                     filters=None,
                     boost_section=section,
@@ -500,11 +571,12 @@ Answer:"""
         # Görsel: "if not docs or max_similarity < MIN_SIM: if dataset_has(course_code, section): use dataset value directly"
         if not retrieved_chunks or max_similarity < 0.30 or len(retrieved_chunks) < min_chunks_for_context:
             # Görsel: Eğer JSON'da **credits** var ama retriever çağırmadıysa
+            # Görsel: ÖNCE dataset fallback kontrolü yap (guard'dan önce)
             if code and requested_section:
                 dataset_value = self._dataset_lookup(course_code=code, section=requested_section)
                 if dataset_value:
                     logger.info(f"Dataset fallback found data for {code}, section={requested_section}")
-                    # Dataset'ten direkt değer kullan
+                    # Dataset'ten direkt değer kullan (partial answer değil, direkt cevap)
                     tr_content = dataset_value.get('tr', f"{code} dersinin {requested_section} bilgisi: {dataset_value.get('value', '')}")
                     en_content = dataset_value.get('en', f"{code} course {requested_section} information: {dataset_value.get('value', '')}")
                     return {
@@ -529,7 +601,10 @@ Answer:"""
         context = self.generate_context(retrieved_chunks)
         
         # Görsel: Context çok kısa ise (az context) yine guard
-        if len(context.strip()) < 100:  # Çok kısa context
+        # Görsel: Ama eğer weekly_topics sorgusuysa ve chunks varsa, context kısa olsa bile devam et
+        is_weekly_topics_query = "haftalık" in query.lower() or "weekly" in query.lower()
+        # Görsel: Weekly topics sorgusu için chunks varsa context kısa olsa bile devam et
+        if len(context.strip()) < 100 and not (is_weekly_topics_query and retrieved_chunks):  # Çok kısa context (weekly topics + chunks varsa hariç)
             logger.warning(f"Context too short ({len(context)} chars), returning no_data_answer")
             return {
                 'query': query,
@@ -544,17 +619,25 @@ Answer:"""
         
         # Görsel: Fallback mekanizması - Partial answer işaretleme
         # Görsel: "Ve cevapta şunu ekle: Bu ders için kredi bilgisi veri setinde doğrudan bulunamadığı için..."
+        # Görsel: Ama eğer dataset'te varsa partial answer ekleme (çünkü zaten dataset fallback'te direkt cevap verdik)
         if mark_as_partial and requested_section:
-            # Partial answer'a çevir (disclaimer ekle)
-            # LLM'in cevabından TR ve EN kısımlarını çıkar
-            tr_match = re.search(r'(?:ANSWER|CEVAP)\s*\(TR\)[:\-]*\s*(.*?)(?=(?:ANSWER|CEVAP)\s*\(EN\)|$)', response, re.IGNORECASE | re.DOTALL)
-            en_match = re.search(r'(?:ANSWER|CEVAP)\s*\(EN\)[:\-]*\s*(.*?)$', response, re.IGNORECASE | re.DOTALL)
+            # Dataset'te kontrol et - eğer varsa partial answer ekleme
+            if not dataset_value:  # Yukarıda zaten kontrol edildi
+                dataset_value = self._dataset_lookup(course_code=code, section=requested_section)
             
-            if tr_match and en_match:
-                tr_content = tr_match.group(1).strip()
-                en_content = en_match.group(1).strip()
-                response = build_partial_answer(tr_content, en_content, info_type="kredi" if requested_section == "credits" else requested_section)
-                logger.info(f"Marked answer as partial for {code} (requested section: {requested_section})")
+            if not dataset_value:
+                # Dataset'te yok, partial answer ekle
+                tr_match = re.search(r'(?:ANSWER|CEVAP)\s*\(TR\)[:\-]*\s*(.*?)(?=(?:ANSWER|CEVAP)\s*\(EN\)|$)', response, re.IGNORECASE | re.DOTALL)
+                en_match = re.search(r'(?:ANSWER|CEVAP)\s*\(EN\)[:\-]*\s*(.*?)$', response, re.IGNORECASE | re.DOTALL)
+                
+                if tr_match and en_match:
+                    tr_content = tr_match.group(1).strip()
+                    en_content = en_match.group(1).strip()
+                    response = build_partial_answer(tr_content, en_content, info_type="kredi" if requested_section == "credits" else requested_section)
+                    logger.info(f"Marked answer as partial for {code} (requested section: {requested_section})")
+            else:
+                # Dataset'te var, partial answer ekleme (zaten exact bilgi var)
+                logger.info(f"Dataset has exact data for {code}, section={requested_section}, not marking as partial")
         
         # Görsel: TR+EN format assertion (Kod seviyesinde garanti)
         # Görsel: "assert 'ANSWER (TR)' in answer" ve "assert 'ANSWER (EN)' in answer"
@@ -716,11 +799,49 @@ Answer:"""
                     all_data = json.load(f)
                 
                 # Flatten department structure
+                # Görsel: Nested course'ları da ekle (parent_course field'ı olan course'lar)
                 for dept_key, courses in all_data.items():
                     for course in courses:
-                        course_code = course.get('course_code', '').replace(' ', '').upper()
-                        if course_code:
-                            dataset[course_code] = course
+                        course_code = course.get('course_code', '')
+                        if not course_code:
+                            continue
+                        # Normalize course code (remove spaces, uppercase)
+                        normalized_code = course_code.replace(' ', '').upper()
+                        if normalized_code:
+                            # Görsel: Nested course'ları da dataset'e ekle (SE420, GER101, GEET312 gibi)
+                            dataset[normalized_code] = course
+                        
+                        # Görsel: available_courses içindeki nested course'ları da ayrı course olarak ekle
+                        # (Eğer zaten ayrı course olarak eklenmemişse)
+                        available_courses = course.get('available_courses', [])
+                        for nested in available_courses:
+                            nested_code = nested.get('course_code', '')
+                            if nested_code:
+                                nested_normalized = nested_code.replace(' ', '').upper()
+                                # Eğer nested course zaten dataset'te yoksa ekle
+                                if nested_normalized and nested_normalized not in dataset:
+                                    # Nested course'u ayrı course olarak ekle
+                                    nested_as_course = {
+                                        'course_code': nested_code,
+                                        'course_name': nested.get('course_name', ''),
+                                        'detail_url': nested.get('detail_url', ''),
+                                        'semester': nested.get('semester', ''),
+                                        'type': nested.get('type', 'Elective'),
+                                        'ects': nested.get('ects'),
+                                        'local_credits': nested.get('local_credits'),
+                                        'objectives': nested.get('objectives', ''),
+                                        'description': nested.get('description', ''),
+                                        'weekly_topics': nested.get('weekly_topics', []),
+                                        'learning_outcomes': nested.get('learning_outcomes', []),
+                                        'assessment': nested.get('assessment', {}),
+                                        'ects_workload': nested.get('ects_workload', {}),
+                                        'prerequisites': nested.get('prerequisites', ''),
+                                        'department': course.get('department', ''),
+                                        'department_key': course.get('department_key', dept_key),
+                                        'parent_course': course_code  # Track parent
+                                    }
+                                    dataset[nested_normalized] = nested_as_course
+                                    logger.debug(f"Added nested course {nested_code} to dataset from available_courses")
                 
                 self._dataset_cache = dataset
                 logger.info(f"Loaded {len(dataset)} courses from dataset")
@@ -767,7 +888,19 @@ Answer:"""
         elif section == "weekly_topics":
             weekly_topics = course.get('weekly_topics', [])
             if weekly_topics:
-                topics_text = "\n".join([f"Week {t.get('week', '')}: {t.get('topic', '')}" for t in weekly_topics])
+                # Görsel: Tüm haftaları formatla
+                topics_list = []
+                for t in weekly_topics:
+                    week = t.get('week', '')
+                    topic = t.get('topic', '')
+                    required_materials = t.get('required_materials', '')
+                    if week and topic:
+                        topic_line = f"Hafta {week}: {topic}"
+                        if required_materials:
+                            topic_line += f"\nGerekli Materyaller: {required_materials}"
+                        topics_list.append(topic_line)
+                
+                topics_text = "\n".join(topics_list)
                 return {
                     'value': topics_text,
                     'tr': f"{course_code} dersinin haftalık konuları:\n{topics_text}",

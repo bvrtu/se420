@@ -281,7 +281,7 @@ class FAISSCourseDB:
                 'similarity': similarity_score
             }
             results.append(result)
-        
+            
         # Sort by similarity (highest first)
         results.sort(key=lambda x: x['similarity'], reverse=True)
         

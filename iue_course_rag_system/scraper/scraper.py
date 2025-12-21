@@ -144,11 +144,28 @@ class IUECourseScraper:
                                     href = urljoin(self.BASE_URL, href)
                                 
                                 if not any(c['course_code'] == code for c in nested_courses):
-                                    nested_courses.append({
+                                    # Görsel: Nested course detaylarını çek
+                                    nested_detail = self.scrape_course_detail(href, code, scraped_course_codes=None)
+                                    nested_course = {
                                         'course_code': self.normalize_course_code(code),  # Görsel: Normalize
                                         'course_name': name,
                                         'detail_url': href
-                                    })
+                                    }
+                                    # Görsel: Detaylar varsa ekle
+                                    if nested_detail:
+                                        nested_course.update({
+                                            'objectives': nested_detail.get('objectives', ''),
+                                            'description': nested_detail.get('description', ''),
+                                            'weekly_topics': nested_detail.get('weekly_topics', []),
+                                            'learning_outcomes': nested_detail.get('learning_outcomes', []),
+                                            'assessment': nested_detail.get('assessment', {}),
+                                            'ects_workload': nested_detail.get('ects_workload', {}),
+                                            'prerequisites': nested_detail.get('prerequisites', ''),
+                                            'ects': nested_detail.get('ects'),
+                                            'local_credits': nested_detail.get('local_credits'),
+                                            'semester': nested_detail.get('semester', '')
+                                        })
+                                    nested_courses.append(nested_course)
                 
                 # Also check for divs or lists with language courses
                 for div in detail_soup.find_all(['div', 'ul', 'ol']):
@@ -171,11 +188,28 @@ class IUECourseScraper:
                                 href = urljoin(self.BASE_URL, href)
                             
                             if not any(c['course_code'] == code for c in nested_courses):
-                                nested_courses.append({
+                                # Görsel: Nested course detaylarını çek
+                                nested_detail = self.scrape_course_detail(href, code, scraped_course_codes=None)
+                                nested_course = {
                                     'course_code': self.normalize_course_code(code),  # Görsel: Normalize
                                     'course_name': name,
                                     'detail_url': href
-                                })
+                                }
+                                # Görsel: Detaylar varsa ekle
+                                if nested_detail:
+                                    nested_course.update({
+                                        'objectives': nested_detail.get('objectives', ''),
+                                        'description': nested_detail.get('description', ''),
+                                        'weekly_topics': nested_detail.get('weekly_topics', []),
+                                        'learning_outcomes': nested_detail.get('learning_outcomes', []),
+                                        'assessment': nested_detail.get('assessment', {}),
+                                        'ects_workload': nested_detail.get('ects_workload', {}),
+                                        'prerequisites': nested_detail.get('prerequisites', ''),
+                                        'ects': nested_detail.get('ects'),
+                                        'local_credits': nested_detail.get('local_credits'),
+                                        'semester': nested_detail.get('semester', '')
+                                    })
+                                nested_courses.append(nested_course)
         
         # Method 2: If no courses found from detail page, try pattern matching in curriculum
         if not nested_courses and sfl_number:
@@ -208,11 +242,29 @@ class IUECourseScraper:
                         href = urljoin(self.BASE_URL, href)
                     
                     if not any(c['course_code'] == code for c in nested_courses):
-                        nested_courses.append({
-                            'course_code': code,
+                        # Görsel: Nested course detaylarını çek
+                        normalized_code = self.normalize_course_code(code)
+                        nested_detail = self.scrape_course_detail(href, normalized_code, scraped_course_codes=None)
+                        nested_course = {
+                            'course_code': normalized_code,  # Görsel: Normalize
                             'course_name': name,
                             'detail_url': href
-                        })
+                        }
+                        # Görsel: Detaylar varsa ekle
+                        if nested_detail:
+                            nested_course.update({
+                                'objectives': nested_detail.get('objectives', ''),
+                                'description': nested_detail.get('description', ''),
+                                'weekly_topics': nested_detail.get('weekly_topics', []),
+                                'learning_outcomes': nested_detail.get('learning_outcomes', []),
+                                'assessment': nested_detail.get('assessment', {}),
+                                'ects_workload': nested_detail.get('ects_workload', {}),
+                                'prerequisites': nested_detail.get('prerequisites', ''),
+                                'ects': nested_detail.get('ects'),
+                                'local_credits': nested_detail.get('local_credits'),
+                                'semester': nested_detail.get('semester', '')
+                            })
+                        nested_courses.append(nested_course)
         
         # Method 3: If still no courses, generate based on pattern and fetch directly
         # Based on images and user feedback: FR, ITL, GER, RUS, SPN, JPN, CHN
@@ -268,11 +320,29 @@ class IUECourseScraper:
                         if not href.startswith('http'):
                             href = urljoin(self.BASE_URL, href)
                         
-                        nested_courses.append({
-                            'course_code': code,  # Görsel: Normalize edilmiş
+                        # Görsel: Nested course detaylarını çek
+                        normalized_code = self.normalize_course_code(code)
+                        nested_detail = self.scrape_course_detail(href, normalized_code, scraped_course_codes=None)
+                        nested_course = {
+                            'course_code': normalized_code,  # Görsel: Normalize edilmiş
                             'course_name': name,
                             'detail_url': href
-                        })
+                        }
+                        # Görsel: Detaylar varsa ekle
+                        if nested_detail:
+                            nested_course.update({
+                                'objectives': nested_detail.get('objectives', ''),
+                                'description': nested_detail.get('description', ''),
+                                'weekly_topics': nested_detail.get('weekly_topics', []),
+                                'learning_outcomes': nested_detail.get('learning_outcomes', []),
+                                'assessment': nested_detail.get('assessment', {}),
+                                'ects_workload': nested_detail.get('ects_workload', {}),
+                                'prerequisites': nested_detail.get('prerequisites', ''),
+                                'ects': nested_detail.get('ects'),
+                                'local_credits': nested_detail.get('local_credits'),
+                                'semester': nested_detail.get('semester', '')
+                            })
+                        nested_courses.append(nested_course)
                         found_in_curriculum = True
                         break
                 
@@ -369,12 +439,29 @@ class IUECourseScraper:
                                         except:
                                             pass
                             
-                            nested_courses.append({
-                                'course_code': self.normalize_course_code(code),  # Görsel: Normalize
+                            # Görsel: Nested course detaylarını çek
+                            normalized_code = self.normalize_course_code(code)
+                            nested_detail = self.scrape_course_detail(nested_href, normalized_code, scraped_course_codes=None)
+                            nested_course = {
+                                'course_code': normalized_code,  # Görsel: Normalize
                                 'course_name': name,
                                 'detail_url': nested_href,
                                 'ects': ects
-                            })
+                            }
+                            # Görsel: Detaylar varsa ekle
+                            if nested_detail:
+                                nested_course.update({
+                                    'objectives': nested_detail.get('objectives', ''),
+                                    'description': nested_detail.get('description', ''),
+                                    'weekly_topics': nested_detail.get('weekly_topics', []),
+                                    'learning_outcomes': nested_detail.get('learning_outcomes', []),
+                                    'assessment': nested_detail.get('assessment', {}),
+                                    'ects_workload': nested_detail.get('ects_workload', {}),
+                                    'prerequisites': nested_detail.get('prerequisites', ''),
+                                    'local_credits': nested_detail.get('local_credits'),
+                                    'semester': nested_detail.get('semester', '')
+                                })
+                            nested_courses.append(nested_course)
         
         # For SFL courses, use special extraction
         elif course_code.startswith('SFL'):
@@ -624,15 +711,15 @@ class IUECourseScraper:
                             if scraped_course_codes is not None:
                                 scraped_course_codes.add(elective_code)
                             if course_detail.get('course_name'):
-                                elective.update({
-                                    'objectives': course_detail.get('objectives', ''),
-                                    'description': course_detail.get('description', ''),
-                                    'weekly_topics': course_detail.get('weekly_topics', []),
-                                    'learning_outcomes': course_detail.get('learning_outcomes', []),
-                                    'assessment': course_detail.get('assessment', {}),
-                                    'ects_workload': course_detail.get('ects_workload', {}),
-                                    'prerequisites': course_detail.get('prerequisites', '')
-                                })
+                            elective.update({
+                                'objectives': course_detail.get('objectives', ''),
+                                'description': course_detail.get('description', ''),
+                                'weekly_topics': course_detail.get('weekly_topics', []),
+                                'learning_outcomes': course_detail.get('learning_outcomes', []),
+                                'assessment': course_detail.get('assessment', {}),
+                                'ects_workload': course_detail.get('ects_workload', {}),
+                                'prerequisites': course_detail.get('prerequisites', '')
+                            })
                     
                     # Check if this elective course is already added (avoid duplicates)
                     elec_code = elective.get('course_code', '')
@@ -1146,7 +1233,7 @@ class IUECourseScraper:
                     
                     # Check for duplicates before adding (normalized code ile)
                     if not any(c.get('course_code') == normalized_code for c in nested_courses):
-                        nested_courses.append(nested_course)
+                    nested_courses.append(nested_course)
         
         # Get minimum ECTS requirement
         min_ects = None
@@ -2013,11 +2100,11 @@ class IUECourseScraper:
                 # POOL courses are already extracted with nested courses
                 detail = {}
             elif course.get('detail_url'):
-                detail = self.scrape_course_detail(
-                    course['detail_url'],
+            detail = self.scrape_course_detail(
+                course['detail_url'],
                     course_code,
                     scraped_course_codes
-                )
+            )
             
             # Merge curriculum info with detail info
             merged_course = {**course, **detail}
@@ -2037,28 +2124,100 @@ class IUECourseScraper:
             if detail.get('application_hours'):
                 merged_course['application_hours'] = detail['application_hours']
             
-            # Process nested courses for SFL/ELEC/POOL (check for duplicates across all departments)
+            # Görsel: SCRAPER'I DÜZELT (EN KRİTİK ADIM)
+            # Görsel: SFL/ELEC/POOL nested course'ları gerçek ders gibi scrape et
+            # Görsel: "for nested in group_course['courses']: detail = scrape_course(nested['url']); save(detail)"
+            # Görsel: Nested course'ları MUTLAKA ayrı course olarak kaydet (scraped_courses.json'a gelmesi için)
             if merged_course.get('available_courses'):
                 filtered_nested = []
+                logger.info(f"Processing {len(merged_course['available_courses'])} nested courses for parent course {merged_course.get('course_code')}")
                 for nested in merged_course['available_courses']:
                     nested_code = nested.get('course_code', '')
-                    if nested_code:
+                    if not nested_code:
+                        logger.warning(f"Nested course has no course_code, skipping")
+                        continue
+                    
                         # Check if already scraped (cross-department check)
                         if nested_code in scraped_course_codes:
                             logger.debug(f"Skipping duplicate nested course (already scraped): {nested_code}")
+                        filtered_nested.append(nested)  # Still add to filtered_nested for parent course
                             continue
                         
-                        # Scrape nested course detail if URL is available
+                    # Görsel: Nested course detaylarını KESİNLİKLE çek (SFL, ELEC, POOL nested course'ları için)
+                    # Görsel: "Ama hiçbir zaman detail page scrape edilmiyor" → ŞİMDİ ÇEKİLECEK
                         nested_url = nested.get('detail_url', '')
                         if nested_url:
+                        # Görsel: Detaylar yoksa veya eksikse MUTLAKA çek
+                        needs_scraping = (
+                            not nested.get('objectives') or 
+                            not nested.get('description') or 
+                            not nested.get('weekly_topics') or
+                            not nested.get('ects') or
+                            not nested.get('local_credits')
+                        )
+                        if needs_scraping:
+                            logger.info(f"Scraping detail page for nested course {nested_code}: {nested_url}")
                             nested_detail = self.scrape_course_detail(nested_url, nested_code, scraped_course_codes)
                             if nested_detail:
-                                nested.update(nested_detail)
-                        
-                        # Mark as scraped (for cross-department duplicate prevention)
+                                # Görsel: Tüm detayları güncelle (weekly_topics, credits, prerequisites, etc.)
+                                nested.update({
+                                    'objectives': nested_detail.get('objectives', nested.get('objectives', '')),
+                                    'description': nested_detail.get('description', nested.get('description', '')),
+                                    'weekly_topics': nested_detail.get('weekly_topics', nested.get('weekly_topics', [])),
+                                    'learning_outcomes': nested_detail.get('learning_outcomes', nested.get('learning_outcomes', [])),
+                                    'assessment': nested_detail.get('assessment', nested.get('assessment', {})),
+                                    'ects_workload': nested_detail.get('ects_workload', nested.get('ects_workload', {})),
+                                    'prerequisites': nested_detail.get('prerequisites', nested.get('prerequisites', '')),
+                                    'ects': nested_detail.get('ects', nested.get('ects')),
+                                    'local_credits': nested_detail.get('local_credits', nested.get('local_credits')),
+                                    'semester': nested_detail.get('semester', nested.get('semester', '')),
+                                    'type': nested_detail.get('type', nested.get('type', 'Elective')),
+                                    'course_name': nested_detail.get('course_name', nested.get('course_name', ''))
+                                })
+                                logger.info(f"Successfully scraped details for nested course {nested_code}")
+                            else:
+                                logger.warning(f"Failed to scrape detail page for nested course {nested_code}")
+                    else:
+                        logger.warning(f"Nested course {nested_code} has no detail_url, will be added without details")
+                    
+                    # Görsel: Nested course'u MUTLAKA ayrı bir course olarak kaydet (dataset'te bulunabilmesi için)
+                    # Görsel: "scraped_courses.json içinde şu alanlar zorunlu olmalı: course_code, weekly_topics, credits, prerequisites"
+                    # Görsel: Scrape başarılı olsun olmasın, nested course'u MUTLAKA ekle (en azından course_code ile)
+                    # Görsel: Bu sayede RAG pipeline'da "course not found" kontrolü çalışır
+                    # Görsel: Nested course'u HER ZAMAN ekle (detail_url olsun olmasın, scrape başarılı olsun olmasın)
+                    # Mark as scraped (for cross-department duplicate prevention) - ÖNCE EKLE, SONRA DUPLICATE KONTROLÜ
+                    if nested_code not in scraped_course_codes:
+                        # Nested course'u ayrı bir course olarak ekle (parent course'un yanında)
+                        # Görsel: Tüm alanları ekle, scrape başarılı olsun olmasın
+                        nested_as_course = {
+                            'course_code': nested_code,
+                            'course_name': nested.get('course_name', ''),
+                            'detail_url': nested_url if nested_url else '',
+                            'semester': nested.get('semester', ''),
+                            'type': nested.get('type', 'Elective'),
+                            'ects': nested.get('ects'),
+                            'local_credits': nested.get('local_credits'),
+                            'objectives': nested.get('objectives', ''),
+                            'description': nested.get('description', ''),
+                            'weekly_topics': nested.get('weekly_topics', []),
+                            'learning_outcomes': nested.get('learning_outcomes', []),
+                            'assessment': nested.get('assessment', {}),
+                            'ects_workload': nested.get('ects_workload', {}),
+                            'prerequisites': nested.get('prerequisites', ''),
+                            'department': merged_course.get('department', dept_info['name']),
+                            'department_key': merged_course.get('department_key', dept_key),
+                            'parent_course': merged_course.get('course_code')  # Track parent
+                        }
+                        # Mark as scraped before adding
                         scraped_course_codes.add(nested_code)
+                        all_courses.append(nested_as_course)
+                        logger.info(f"✅ Added nested course {nested_code} as separate course entry to all_courses (will be saved to scraped_courses.json)")
+                    else:
+                        logger.debug(f"Nested course {nested_code} already in scraped_course_codes, skipping duplicate")
+                    
                         filtered_nested.append(nested)
                 merged_course['available_courses'] = filtered_nested
+                logger.info(f"Processed {len(filtered_nested)} nested courses for parent course {merged_course.get('course_code')}")
             
             # Remove fields that are not needed (not in requirements)
             merged_course.pop('learning_outcomes', None)
