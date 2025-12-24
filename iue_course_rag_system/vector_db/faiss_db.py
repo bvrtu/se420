@@ -102,9 +102,7 @@ class FAISSCourseDB:
     
     def search_by_metadata(self, filters: Dict, n_results: int = 5) -> List[Dict]:
         """
-        Görsel: Exact metadata lookup - Önce exact match (course_code + section)
-        Görsel: "1) Metadata ile önce daralt, sonra similarity"
-        Görsel: "Exact metadata lookup (course_code+section) → önce"
+        Exact metadata lookup (course_code/section) before similarity search.
         
         Args:
             filters: Dictionary with metadata filters (course_code, section, department, etc.)
@@ -188,14 +186,12 @@ class FAISSCourseDB:
             logger.error(f"Query dimension mismatch: {query_array.shape[1]} != {self.dimension}")
             return []
         
-        # Görsel: YANLIŞ SIRA - Similarity search → Sonra metadata kontrolü
-        # Görsel: DOĞRU SIRA - Metadata ile daralt (course_code, section) → Sonra similarity
-        # Görsel: "Bu fark, projeni 'çalışıyor'dan 'akademik olarak doğru'ya taşır"
+        # Correct order: apply metadata filters first, then similarity search.
         
-        # ÖNCE: Metadata ile daralt (Görsel: Doğru sıra)
+        # First: narrow down candidates with metadata
         candidate_indices = set()
         if filters or department_filter or course_type_filter:
-            # Görsel: Önce metadata ile daralt
+            # Apply metadata filters first
             for idx in range(len(self.metadata)):
                 metadata = self.metadata[idx]
                 
@@ -213,7 +209,7 @@ class FAISSCourseDB:
                         if metadata.get('department', '') != filters['department']:
                             continue
                     
-                    # section exact match (Görsel: Section hard filter)
+                    # section exact match (hard filter)
                     if 'section' in filters:
                         if metadata.get('section', '').lower() != filters['section'].lower():
                             continue
@@ -229,12 +225,12 @@ class FAISSCourseDB:
             # Filter yoksa tüm index'ler candidate
             candidate_indices = set(range(len(self.metadata)))
         
-        # Görsel: Strict mode - Eğer filters varsa ve strict=True ise, sadece filtered results
+        # Strict mode: if filters are provided, only search within filtered candidates
         if strict and filters and not candidate_indices:
             logger.warning(f"Strict mode: No candidates found for filters {filters}")
             return []
         
-        # SONRA: Similarity search (Görsel: Doğru sıra - metadata daraltıldıktan sonra)
+        # Then: similarity search on the narrowed candidate set
         # FAISS'te tüm index'te search yap, ama sonuçları candidate_indices ile filtrele
         k = min(n_results * 10, self.index.ntotal) if candidate_indices else n_results * 2
         k = min(k, self.index.ntotal)
@@ -249,7 +245,7 @@ class FAISSCourseDB:
             if idx == -1 or idx in seen_indices:
                 continue
             
-            # Görsel: Metadata filter'ı geçmeyenleri atla (ÖNCE metadata ile daralt)
+            # Skip items that don't pass metadata filters
             if idx not in candidate_indices:
                 continue
             

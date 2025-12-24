@@ -100,7 +100,7 @@ def detect_hallucination(actual_answer: str, retrieved_chunks: List[Dict]) -> bo
 
 def calculate_accuracy(expected_answer: str, actual_answer: str) -> float:
     """
-    Calculate answer accuracy (Görsel: Hallucination / accuracy metrikleri)
+    Calculate answer accuracy.
     
     Args:
         expected_answer: Expected answer (ground truth)
@@ -125,7 +125,7 @@ def calculate_accuracy(expected_answer: str, actual_answer: str) -> float:
 
 def check_tr_en_format(answer: str) -> Dict[str, bool]:
     """
-    Check if answer follows TR+EN format (Görsel: TR+EN enforce testleri)
+    Check if answer follows TR+EN format.
     
     Args:
         answer: Generated answer
@@ -170,7 +170,7 @@ def check_tr_en_format(answer: str) -> Dict[str, bool]:
 
 def calculate_metrics(expected_answer: str, actual_answer: str, retrieved_chunks: List[Dict]) -> Dict:
     """
-    Calculate all metrics for a single question (Görsel: Hallucination / accuracy metrikleri eklendi)
+    Calculate all metrics for a single question.
     
     Args:
         expected_answer: Expected answer (ground truth)
@@ -189,14 +189,14 @@ def calculate_metrics(expected_answer: str, actual_answer: str, retrieved_chunks
     is_hallucination = detect_hallucination(actual_answer, retrieved_chunks)
     accuracy = calculate_accuracy(expected_answer, actual_answer)
     
-    # TR+EN format check (Görsel: TR+EN enforce testleri)
+    # TR+EN format check
     tr_en_format = check_tr_en_format(actual_answer)
     
     return {
         'retrieval_accuracy': retrieval_accuracy,
         'groundedness': groundedness,
         'is_hallucination': is_hallucination,
-        'accuracy': accuracy,  # Görsel: accuracy metrikleri
+        'accuracy': accuracy,
         'num_retrieved_chunks': len(retrieved_chunks),
-        'tr_en_format': tr_en_format  # Görsel: TR+EN enforce testleri
+        'tr_en_format': tr_en_format
     }

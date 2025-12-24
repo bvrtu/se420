@@ -13,7 +13,7 @@ import numpy as np
 
 logger = logging.getLogger(__name__)
 
-# Maximum chunk size for embedding quality (ÇÖZÜM: Çok uzun chunk → embedding kalitesi düşüyor)
+# Maximum chunk size for embedding quality (very long texts reduce embedding specificity)
 MAX_CHUNK_SIZE = 500
 
 
@@ -34,7 +34,7 @@ class CourseEmbedder:
     
     def split_text(self, text: str) -> List[str]:
         """
-        Split text into chunks of maximum size (ÇÖZÜM: Retrieval precision artırır)
+        Split text into chunks of maximum size (improves retrieval precision).
         
         Args:
             text: Text to split
@@ -77,7 +77,7 @@ class CourseEmbedder:
             dim = self.model.get_sentence_embedding_dimension()
             return [0.0] * dim
         
-        # Split if too long (ÇÖZÜM: Embedding kalitesi için)
+        # Split if too long (embedding quality)
         if len(text) > MAX_CHUNK_SIZE:
             # Use first chunk for embedding
             chunks = self.split_text(text)
@@ -88,7 +88,7 @@ class CourseEmbedder:
     
     def embed_chunks(self, chunks: List[Dict], batch_size: int = 32) -> List[Dict]:
         """
-        Generate embeddings for all chunks (Görsel: Chunk uzunluğu kontrolü çok önemli)
+        Generate embeddings for all chunks (chunk length control matters for embedding quality).
         
         Args:
             chunks: List of chunk dictionaries with 'text' field
@@ -99,12 +99,11 @@ class CourseEmbedder:
         """
         logger.info(f"Generating embeddings for {len(chunks)} chunks...")
         
-        # Görsel: Chunk uzunluğu kontrolü (700-1000 token → embedding bulanıklaşır)
-        # Görsel: MAX_CHUNK_SIZE = 500 gibi bir sınır öneririm
+        # Chunk length control: very long chunks can blur embeddings.
         processed_chunks = []
         for chunk in chunks:
             text = chunk.get('text', '')
-            # Görsel: Uzun chunk'ları split et (embedding quality için)
+            # Split long chunks (embedding quality)
             if len(text) > MAX_CHUNK_SIZE:
                 logger.warning(f"Chunk too long ({len(text)} chars), splitting...")
                 split_texts = self.split_text(text)

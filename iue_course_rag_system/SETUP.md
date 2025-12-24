@@ -18,7 +18,6 @@ pip install -r requirements.txt
 
 **Note:** This may take a few minutes as it downloads:
 - Sentence-BERT models (automatic on first use)
-- ChromaDB dependencies
 - PyTorch (for embeddings)
 
 ### 3. Install Ollama (Recommended for LLM)
@@ -76,14 +75,14 @@ iue_course_rag_system/
 ├── scraper/              # Web scraping (complete, tested)
 ├── data_processing/      # Data cleaning and chunking
 ├── embeddings/           # Sentence-BERT embeddings (free)
-├── vector_db/            # ChromaDB vector database (free)
+├── vector_db/            # FAISS vector database (free)
 ├── rag/                  # RAG pipeline (Ollama/HuggingFace - free)
 ├── evaluation/           # Evaluation framework
 ├── data/                 # Generated data (created after running)
 │   ├── raw/             # Scraped JSON
 │   ├── processed/       # Chunked JSON
-│   ├── embeddings/       # Embedded chunks
-│   └── vector_db/        # ChromaDB database
+│   ├── embeddings/       # Embedded chunks (optional; can be regenerated)
+│   └── vector_db/        # FAISS index + metadata
 ├── main.py              # Main pipeline script
 ├── query.py             # Query interface
 └── run_evaluation.py    # Evaluation script
@@ -94,7 +93,7 @@ iue_course_rag_system/
 All components are **100% free and open-source**:
 
 - ✅ **Embeddings**: Sentence-BERT (all-MiniLM-L6-v2)
-- ✅ **Vector DB**: ChromaDB
+- ✅ **Vector DB**: FAISS
 - ✅ **LLM**: Ollama (llama3.2) or HuggingFace Transformers
 - ✅ **No API keys required**
 - ✅ **No paid services**
@@ -103,7 +102,7 @@ All components are **100% free and open-source**:
 
 ### FAISS Installation
 
-FAISS is used as the vector database (more reliable than ChromaDB, no dependency conflicts).
+FAISS is used as the vector database (reliable and easy to install).
 If you encounter issues:
 - For CPU: `pip install faiss-cpu`
 - For GPU: `pip install faiss-gpu` (requires CUDA)

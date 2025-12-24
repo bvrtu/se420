@@ -10,14 +10,14 @@ iue_course_rag_system/
 ├── scraper/              # Web scraping module
 ├── data_processing/      # Data cleaning and structuring
 ├── embeddings/           # Embedding generation (Sentence-BERT - free)
-├── vector_db/            # Vector database (ChromaDB - free)
+├── vector_db/            # Vector database (FAISS - free)
 ├── rag/                  # RAG pipeline (Ollama/HuggingFace - free)
 ├── evaluation/           # Evaluation framework
 ├── data/
 │   ├── raw/             # Raw scraped data
 │   ├── processed/        # Processed and chunked data
 │   ├── embeddings/       # Generated embeddings
-│   └── vector_db/        # ChromaDB database
+│   └── vector_db/        # FAISS index + metadata
 └── main.py               # Main pipeline script
 ```
 
@@ -107,7 +107,7 @@ python run_evaluation.py --questions-file data/evaluation_questions.json
 1. **Web Scraping**: Extracts course data from IUE ECTS website
 2. **Data Processing**: Cleans, normalizes, and chunks course content
 3. **Embedding**: Generates semantic embeddings using Sentence-BERT
-4. **Vector Database**: Stores embeddings in ChromaDB
+4. **Vector Database**: Stores embeddings in FAISS (persisted locally)
 5. **RAG Pipeline**: Retrieves relevant chunks and generates answers using free LLM
 
 ## Free Components Used

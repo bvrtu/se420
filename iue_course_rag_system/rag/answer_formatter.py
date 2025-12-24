@@ -7,7 +7,7 @@ Prevents hallucination by providing structured "no data" responses
 
 def format_answer(tr: str, en: str) -> str:
     """
-    Format answer in both Turkish and English (ÇÖZÜM: TR+EN cevap yapısı)
+    Format answer in both Turkish and English (TR+EN).
     
     Args:
         tr: Turkish answer
@@ -29,7 +29,7 @@ ANSWER (EN)
 
 def build_no_data_answer() -> str:
     """
-    Build standardized "no data" answer (ÇÖZÜM: "VERİ YOK" CEVABI - HALLUCINATION BİTER)
+    Build a standardized "no data" answer (prevents hallucinations).
     
     Returns:
         Formatted "no data" answer in both languages
@@ -41,7 +41,7 @@ def build_no_data_answer() -> str:
 
 def build_partial_answer(tr_content: str, en_content: str, info_type: str = "kredi") -> str:
     """
-    Build partial answer with disclaimer (Görsel: Fallback mekanizması için)
+    Build partial answer with a clear disclaimer.
     
     Args:
         tr_content: Turkish answer content
@@ -62,7 +62,7 @@ def build_partial_answer(tr_content: str, en_content: str, info_type: str = "kre
 
 def build_pool_course_answer(course_code: str) -> str:
     """
-    Build answer for pool courses (Görsel: Pool course logic)
+    Build an explanation for pool courses (ELEC/POOL/SFL containers).
     
     Args:
         course_code: Pool course code (e.g., "ELEC001", "POOL003")

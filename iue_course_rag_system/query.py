@@ -13,8 +13,7 @@ from pathlib import Path
 project_root = Path(__file__).parent
 sys.path.insert(0, str(project_root))
 
-# ÇÖZÜM: COURSE CODE DETECTION (ZORUNLU) - Görseldeki formata göre güncellendi
-import re
+# Course-code detection (used to apply hard filters in retrieval)
 
 COURSE_CODE_REGEX = r"\b[A-Z]{2,4}\s?\d{3}\b"
 
@@ -57,7 +56,7 @@ def load_rag_pipeline(data_dir: str = "data", llm_provider: str = "ollama", mode
         embedder=embedder,
         llm_provider=llm_provider,
         model_name=model_name,
-        data_dir=data_dir  # Görsel: Dataset fallback için data_dir ekle
+        data_dir=data_dir  # Enable JSON dataset fallback
     )
     
     return rag_pipeline
@@ -90,20 +89,17 @@ def interactive_query(rag_pipeline):
                 print("  - How many elective courses are in the final year?")
                 continue
             
-            # Görsel: Course code extraction zorunlu olarak pipeline'a aktarılmalı
-            # Görsel: "course_code = extract_course_code(query)" ve "rag_pipeline.run(query, course_code=course_code)" akışı kesin olmalı
+            # Extract course code (if present) and pass into the pipeline.
             course_code = extract_course_code(query)
             
-            # Görsel: course_code None olsa bile bilinçli işlenmeli
-            # Run query - course_code zorunlu parametre olarak gönder (garanti)
+            # Run query (course_code may be None)
             print("\nProcessing query...")
             if course_code:
                 print(f"Detected course code: {course_code}")
             else:
                 print("No course code detected in query")
             
-            # Görsel: Pipeline'a zorunlu aktarım (garanti mekanizması)
-            result = rag_pipeline.query(query, n_results=15, course_code=course_code)  # course_code zorunlu parametre
+            result = rag_pipeline.query(query, n_results=15, course_code=course_code)
             
             # Display results
             print("\n" + "-"*60)
@@ -162,14 +158,14 @@ def main():
     
     # Run query
     if args.query:
-        # Görsel: Course code extraction zorunlu olarak pipeline'a aktarılmalı
+        # Pass extracted course_code into the pipeline (if present).
         course_code = extract_course_code(args.query)
         if course_code:
             print(f"Detected course code: {course_code}")
         else:
             print("No course code detected in query")
         
-        # Görsel: Pipeline'a zorunlu aktarım (garanti mekanizması)
+        # Run query with optional hard filters.
         result = rag_pipeline.query(args.query, n_results=15, course_code=course_code)  # course_code zorunlu parametre
         print("\n" + "="*60)
         print("QUERY:", args.query)

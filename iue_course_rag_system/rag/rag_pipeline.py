@@ -181,8 +181,8 @@ class RAGPipeline:
         Returns:
             Generated response
         """
-        # KESİN PROMPT (BİREBİR KULLAN) - Görseldeki template'e göre güncellendi
-        # Görsel: Haftalık konular için tüm haftaları listele
+        # LLM prompt: bilingual (TR+EN) + grounded output.
+        # For weekly topics, we explicitly require listing *all* weeks found in context.
         weekly_topics_instruction = ""
         if "haftalık" in query.lower() or "weekly" in query.lower():
             weekly_topics_instruction = """
@@ -207,6 +207,7 @@ CRITICAL INSTRUCTIONS FOR WEEKLY TOPICS:
 5. DO NOT make up or invent information.
 6. DO NOT say "not found", "bulamadık", "Haftalık konuları bulamadık", or "No weekly topics found" if the information EXISTS in the retrieved documents.
 7. If weekly topics are in the documents, you MUST list them ALL.{weekly_topics_instruction}
+8. Turkish must be fluent and natural (no word-by-word translation and no mixed TR/EN sentences). Keep course codes/titles as-is.
 
 OUTPUT FORMAT (MANDATORY):
 ------------------------------------------------------------
@@ -240,7 +241,7 @@ Answer:"""
                 )
                 raw_response = response['response']
                 
-                # Format response through answer_formatter (ÇÖZÜM: LLM'den gelen cevabı buradan geçirmeden yazdırma)
+                # Format response through answer_formatter (ensures TR+EN wrapper).
                 # Check if response already has TR/EN format
                 if "ANSWER (TR)" in raw_response and "ANSWER (EN)" in raw_response:
                     return raw_response
@@ -300,13 +301,10 @@ Answer:"""
         if not course_code:
             course_code = self._extract_course_code(query)
         
-        # ÇÖZÜM A: HARD FILTER (KAÇMA BİTER) - Görsel: Course code hard filter GARANTİ
-        # Görsel: "Bu bir 'optimizasyon' değil, Bu bir akademik zorunluluk"
+        # Hard filter: course_code matching is an academic requirement (prevents cross-course leakage).
         code = course_code  # extract_course_code(query) zaten yapıldı - ÖNCE TANIMLA
         
-        # Görsel: RAG TARAFINDA YAPILMASI GEREKEN TEK ŞEY
-        # Görsel: "if course_code not in dataset_courses: return NO_DATA_EXPLICIT"
-        # Görsel: Bu sayede SE420 scrape edilmeden uydurma yerine "Bu dersin bilgisi mevcut değil" denir
+        # If the course code does not exist in the dataset, never call the LLM.
         if code:
             dataset = self._load_dataset()
             normalized_code = code.replace(' ', '').upper()
@@ -328,33 +326,29 @@ Answer:"""
             if not course_type_filter:
                 course_type_filter = detected.get('course_type_filter')
         
-        # Görsel: Department filter zorunlu - Core courses gibi sorularda
-        # Görsel: "Retriever'a şu filtre zorunlu olmalı: department == 'Software Engineering'"
-        # Görsel: "Bu filtre şu an her soruda aktif değil" → Zorunlu yap
+        # If user asks "core/mandatory/important courses" without a course code, we enforce a department filter.
         query_lower = query.lower()
         
-        # Görsel (2): Section-aware retrieval hâlâ "soft"
-        # Görsel: "sadece boost ediliyorsa ❌" ve "ama zorlanmıyorsa ❌"
-        # Görsel: "Haftalık konu sorusu, objectives'tan cevaplanabilir" → Hard filter olmalı
+        # Section-aware retrieval: use hard filters (not only boosting) for credits / weekly topics questions.
         section = None  # ÖNCE TANIMLA
-        requested_section = None  # Görsel: Fallback için hangi section arandığını hatırla
+        requested_section = None  # Remember requested section for fallbacks
         if "kredi" in query_lower or "credit" in query_lower or "ects" in query_lower:
-            section = "credits"  # Görsel: "prerequisites" değil, "credits" olmalı
+            section = "credits"
             requested_section = "credits"
         elif "haftalık" in query_lower or "weekly" in query_lower:
-            section = "weekly_topics"  # Görsel: "objectives" değil, "weekly_topics" olmalı
+            section = "weekly_topics"
             requested_section = "weekly_topics"
         
         intent_detected = None
         if not code:  # Course code yoksa intent kontrolü yap
             if "core" in query_lower or "important" in query_lower or "önemli" in query_lower or "temel" in query_lower:
-                intent_detected = "core_courses"  # Görsel: "important_courses", "core_courses"
+                intent_detected = "core_courses"
             elif "mandatory" in query_lower or "required" in query_lower or "zorunlu" in query_lower:
                 intent_detected = "mandatory_courses"
             
-            # Görsel: "if no_course_code and intent in ['important_courses', 'core_courses']: restrict retrieval to: department == 'Software Engineering' AND section in ['description', 'objectives']"
+            # If no course code and intent-based question: restrict retrieval to department and key sections.
             if intent_detected in ["core_courses", "important_courses", "mandatory_courses"]:
-                # Department filter zorunlu (Görsel: Akademik hata önleme)
+                # Enforce department filter for intent-based queries
                 if not department_filter:
                     # Query'den department çıkar, yoksa default Software Engineering
                     if "software engineering" in query_lower or "yazılım mühendisliği" in query_lower:
@@ -370,21 +364,203 @@ Answer:"""
                         department_filter = "Software Engineering"
                         logger.info(f"No department specified in query, defaulting to Software Engineering for intent: {intent_detected}")
                 
-                # Görsel: Section filter - "section in ['description', 'objectives']"
+                # For intent-based queries, prefer description/objectives to avoid noisy sections.
                 # Core courses için sadece description ve objectives section'larından arama yap
                 if not section:  # Eğer başka bir section filter yoksa
                     # Core courses için section filter ekle (description veya objectives)
                     # Bu filter'ı retrieve'de kullanacağız
                     logger.info(f"Intent detected: {intent_detected}, enforcing department filter: {department_filter}, restricting to sections: description, objectives")
+
+        # -------------------------
+        # Deterministik cevaplar (LLM'siz) → daha doğal TR, daha az bozuk çeviri
+        # -------------------------
+        def _parse_academic_year(q: str) -> Optional[int]:
+            """Parse academic year of study (1..5) from query text."""
+            ql = q.lower()
+            if "final year" in ql or "last year" in ql or "son sınıf" in ql:
+                return 4
+            if "fifth year" in ql or "5th year" in ql or "5. yıl" in ql or "5.yıl" in ql:
+                return 5
+            if "fourth year" in ql or "4th year" in ql or "4. yıl" in ql or "4.yıl" in ql:
+                return 4
+            if "third year" in ql or "3rd year" in ql or "3. yıl" in ql or "3.yıl" in ql:
+                return 3
+            if "second year" in ql or "2nd year" in ql or "2. yıl" in ql or "2.yıl" in ql:
+                return 2
+            if "first year" in ql or "1st year" in ql or "1. yıl" in ql or "1.yıl" in ql:
+                return 1
+            m = re.search(r"\b([1-5])\s*(?:st|nd|rd|th)?\s*year\b", ql)
+            if m:
+                return int(m.group(1))
+            m = re.search(r"\b([1-5])\s*\.?\s*y[ıi]l\b", ql)
+            if m:
+                return int(m.group(1))
+            return None
+
+        # 1) "zorunlu / mandatory dersler" listesi
+        if not code and intent_detected == "mandatory_courses" and department_filter:
+            dataset = self._load_dataset()
+            mandatory = []
+            for c in dataset.values():
+                if c.get("department") != department_filter:
+                    continue
+                ctype = (c.get("type") or "").strip().lower()
+                if ctype in {"mandatory", "required"}:
+                    cc = (c.get("course_code") or "").replace(" ", "").upper()
+                    name = (c.get("course_name") or "").strip()
+                    if cc:
+                        mandatory.append((cc, name))
+            mandatory = sorted(set(mandatory), key=lambda x: x[0])
+            if mandatory:
+                tr_lines = [f"{department_filter} bölümünde (veri setine göre) zorunlu dersler:"] + [
+                    f"- {cc}: {name}" if name else f"- {cc}" for cc, name in mandatory
+                ]
+                en_lines = [f"Mandatory courses in {department_filter} (based on the dataset):"] + [
+                    f"- {cc}: {name}" if name else f"- {cc}" for cc, name in mandatory
+                ]
+                return {
+                    'query': query,
+                    'retrieved_chunks': [],
+                    'context': '',
+                    'response': format_answer("\n".join(tr_lines), "\n".join(en_lines)),
+                    'num_results': 0
+                }
+
+        # 3) Sayısal/hesaplama soruları (LLM'siz)
+        # - "Which academic year has the highest total ECTS load?"
+        # - "How many elective courses are offered in the final year of X?"
+        if not code:
+            ql = query_lower
+            dataset = self._load_dataset()
+            year_of_study = _parse_academic_year(ql)
+
+            # Highest total ECTS load (by year of study)
+            if ("highest total ects" in ql) or ("en yüksek" in ql and "ects" in ql):
+                totals: Dict[int, float] = {}
+                # Use Mandatory courses to represent curriculum load (electives vary by choice)
+                for c in dataset.values():
+                    y = c.get("year")
+                    ects = c.get("ects")
+                    ctype = (c.get("type") or "").strip().lower()
+                    if y is None or ects is None:
+                        continue
+                    if ctype not in {"mandatory", "required"}:
+                        continue
+                    try:
+                        y_int = int(y)
+                        ects_f = float(ects)
+                    except Exception:
+                        continue
+                    totals[y_int] = totals.get(y_int, 0.0) + ects_f
+
+                if totals:
+                    best_year = max(totals.items(), key=lambda kv: kv[1])[0]
+                    tr_lines = [
+                        f"Veri setine göre (zorunlu derslerin ECTS toplamı baz alınarak) en yüksek ECTS yükü **{best_year}. sınıf**tadır.",
+                        "",
+                        "Yıllara göre toplam ECTS (zorunlu dersler):",
+                    ] + [f"- {y}. sınıf: {totals[y]:.0f} ECTS" for y in sorted(totals)]
+                    en_lines = [
+                        f"Based on the dataset (summing ECTS of mandatory courses), the highest ECTS load is in **Year {best_year}**.",
+                        "",
+                        "Total ECTS by year (mandatory courses):",
+                    ] + [f"- Year {y}: {totals[y]:.0f} ECTS" for y in sorted(totals)]
+                    return {
+                        "query": query,
+                        "retrieved_chunks": [],
+                        "context": "",
+                        "response": format_answer("\n".join(tr_lines), "\n".join(en_lines)),
+                        "num_results": 0,
+                    }
+
+            # Count electives in a given year (department-specific if present)
+            asks_count = ("how many" in ql) or ("kaç tane" in ql) or ("kaç adet" in ql)
+            asks_elective = ("elective" in ql) or ("seçmeli" in ql)
+            if asks_count and asks_elective and year_of_study:
+                dept = department_filter  # may be None; we still handle "all departments"
+                count = 0
+                for c in dataset.values():
+                    if dept and c.get("department") != dept:
+                        continue
+                    y = c.get("year")
+                    ctype = (c.get("type") or "").strip().lower()
+                    if y is None:
+                        continue
+                    try:
+                        y_int = int(y)
+                    except Exception:
+                        continue
+                    if y_int != year_of_study:
+                        continue
+                    if ctype != "elective":
+                        continue
+                    count += 1
+                if count > 0:
+                    dept_tr = f"{dept} bölümünde" if dept else "tüm bölümler genelinde"
+                    dept_en = f"in {dept}" if dept else "across all departments"
+                    tr = f"Veri setine göre {dept_tr} {year_of_study}. sınıfta toplam **{count}** seçmeli ders bulunmaktadır."
+                    en = f"Based on the dataset, there are **{count}** elective courses in Year {year_of_study} {dept_en}."
+                    return {
+                        "query": query,
+                        "retrieved_chunks": [],
+                        "context": "",
+                        "response": format_answer(tr, en),
+                        "num_results": 0,
+                    }
+
+        # 2) Bölüm bazlı "hangi bölümlerde var?" tarzı konu soruları
+        if not code:
+            ql = query_lower
+            wants_departments = ("department" in ql) or ("bölüm" in ql) or ("departman" in ql)
+            if wants_departments:
+                topic_keywords = []
+                if ("machine learning" in ql) or ("makine öğren" in ql) or ("machine-learning" in ql):
+                    topic_keywords = ["machine learning", "neural", "deep learning", "data science", "artificial intelligence", "ai"]
+                elif ("data analysis" in ql) or ("veri analizi" in ql):
+                    topic_keywords = ["data analysis", "exploratory", "data science", "statistics", "statistical", "analytics", "quality control"]
+
+                if topic_keywords:
+                    dataset = self._load_dataset()
+                    hits_by_dept: Dict[str, List[str]] = {}
+                    for c in dataset.values():
+                        dept = (c.get("department") or "").strip()
+                        if not dept:
+                            continue
+                        blob = " ".join([
+                            str(c.get("course_code") or ""),
+                            str(c.get("course_name") or ""),
+                            str(c.get("description") or ""),
+                            str(c.get("objectives") or ""),
+                        ]).lower()
+                        if any(k in blob for k in topic_keywords):
+                            code_norm = (c.get("course_code") or "").replace(" ", "").upper()
+                            name = (c.get("course_name") or "").strip()
+                            if code_norm:
+                                hits_by_dept.setdefault(dept, []).append(f"{code_norm}: {name}" if name else code_norm)
+
+                    if hits_by_dept:
+                        sorted_depts = sorted(hits_by_dept.items(), key=lambda kv: (-len(set(kv[1])), kv[0]))
+                        tr = ["Veri setine göre ilgili dersler şu bölümlerde geçiyor:"] + [
+                            f"- {dept} ({len(set(items))} ders): " + ", ".join(sorted(set(items))[:6]) for dept, items in sorted_depts
+                        ]
+                        en = ["Based on the dataset, related courses appear in these departments:"] + [
+                            f"- {dept} ({len(set(items))} courses): " + ", ".join(sorted(set(items))[:6]) for dept, items in sorted_depts
+                        ]
+                        return {
+                            'query': query,
+                            'retrieved_chunks': [],
+                            'context': '',
+                            'response': format_answer("\n".join(tr), "\n".join(en)),
+                            'num_results': 0
+                        }
         
-        # Görsel: Pool course kontrolü (ELEC 001, POOL 003 gibi)
-        # Görsel: "Bu bilgi dataset'te dolaylı olarak var, ama sen pipeline'da pool logic'i hiç ele almıyorsun"
+        # Pool course handling (ELEC/POOL/SFL containers)
         is_pool_course = False
         if code:
             code_upper = code.upper()
             if code_upper.startswith("ELEC") or code_upper.startswith("POOL") or code_upper.startswith("SFL"):
                 is_pool_course = True
-                # Görsel: Pool course için özel açıklama
+                # Pool course: respond with an explanation for credit questions
                 if requested_section == "credits":
                     logger.info(f"Pool course detected: {code}, returning pool course explanation")
                     return {
@@ -395,7 +571,7 @@ Answer:"""
                         'num_results': 0
                     }
         
-        # Görsel: Section varsa, filters'a ekle (hard filter, sadece boost değil)
+        # If section intent exists, add it to hard filters (not only boosting)
         if section and code:
             # Course code + section hard filter
             filters = {"course_code": code, "section": section}
@@ -408,43 +584,39 @@ Answer:"""
         else:
             filters = None
         
-        # Görsel: ÇÖZÜM - Exact metadata lookup önce, sonra similarity
-        # Görsel: "1) Metadata ile önce daralt, sonra similarity"
-        # Görsel: "Exact metadata lookup (course_code+section) → önce"
-        mark_as_partial = False  # Görsel: Fallback mekanizması için flag
+        # Retrieval order: exact metadata lookup first, similarity search second.
+        mark_as_partial = False  # Used to mark fallback answers as partial
         retrieved_chunks = []
         
-        # Görsel: ÖNCE - Dataset fallback kontrolü (eğer exact lookup başarısız olursa kullanılacak)
-        # Görsel: Kredi bilgisi için önce dataset'te kontrol et
+        # Dataset lookup is used as a safe fallback (and for deterministic answers).
         dataset_value = None
         if code and requested_section:
             dataset_value = self._dataset_lookup(course_code=code, section=requested_section)
             if dataset_value:
                 logger.info(f"Dataset has exact data for {code}, section={requested_section}")
         
-        # Görsel: ÖNCE - Exact metadata lookup (course_code + section)
+        # First: exact metadata lookup (course_code + section)
         if filters and code:
-            # Görsel: "docs = db.search_by_metadata({ 'course_code': course_code, 'section': section })"
-            # Görsel: Haftalık konular için tüm chunk'ları al (her hafta ayrı chunk)
+            # For weekly topics we increase n_results to capture all weeks (each week is a separate chunk).
             lookup_n_results = n_results * 20 if requested_section == "weekly_topics" else n_results
             exact_chunks = self.vector_db.search_by_metadata(filters, n_results=lookup_n_results)
             if exact_chunks:
                 logger.info(f"Exact metadata lookup found {len(exact_chunks)} chunks for {filters}")
                 retrieved_chunks = exact_chunks
-                # Görsel: Eğer exact lookup başarılı olduysa, dataset'te de varsa partial answer ekleme
+                # If exact lookup succeeded and dataset also has data, do not mark as partial.
                 if dataset_value:
                     logger.info(f"Exact lookup successful, dataset also has data - using exact lookup results")
             else:
-                # Görsel: "if not docs: docs = db.search_by_metadata({ 'course_code': course_code })"
+                # Fallback: try course_code only if section-specific lookup fails.
                 # Fallback: Sadece course_code ile arama (section filter'ı kaldır)
                 if requested_section:
                     logger.info(f"Exact section '{requested_section}' not found for {code}, trying fallback: course_code only")
                     fallback_filters = {"course_code": code}
-                    # Görsel: Haftalık konular için tüm chunk'ları al
+                    # For weekly topics we increase n_results to capture all weeks.
                     fallback_n_results = n_results * 30 if requested_section == "weekly_topics" else n_results * 2
                     exact_chunks = self.vector_db.search_by_metadata(fallback_filters, n_results=fallback_n_results)
                     if exact_chunks:
-                        # Görsel: Fallback'te section'a göre filtrele (weekly_topics için tüm haftaları al)
+                        # Filter fallback results down to weekly_topics only.
                         if requested_section == "weekly_topics":
                             # Sadece weekly_topics section'ından chunk'ları al (tüm haftalar)
                             exact_chunks = [chunk for chunk in exact_chunks 
@@ -452,15 +624,28 @@ Answer:"""
                         retrieved_chunks = exact_chunks
                         mark_as_partial = True
                         logger.info(f"Fallback successful: found {len(retrieved_chunks)} chunks for {code}")
+
+        # Avoid calling the LLM for structured answers (weekly_topics / credits).
+        # Bu sayede TR cevabı bozuk/karışık çeviri olmaz; kaynak metin olduğu gibi, doğal TR çerçevede sunulur.
+        if code and requested_section in {"weekly_topics", "credits"} and dataset_value:
+            # Haftalık konular için kaynak içerik zaten dataset'te var; LLM ile "çevirip bozma"
+            logger.info(f"Using dataset-only answer for {code}, section={requested_section} (LLM NOT CALLED)")
+            return {
+                'query': query,
+                'retrieved_chunks': retrieved_chunks,
+                'context': '',
+                'response': format_answer(dataset_value.get('tr', ''), dataset_value.get('en', '')),
+                'num_results': len(retrieved_chunks)
+            }
         
         if not retrieved_chunks:
-            # Görsel: "Similarity search → sonra"
+            # Similarity search (after metadata lookups)
             retrieved_chunks = self.retrieve(
                 query=enhanced_query,
                 n_results=n_results * 2 if filters else n_results,
                 department_filter=department_filter,
                 course_type_filter=course_type_filter,
-                filters=filters,  # Görsel: Hard filter GARANTİ
+                filters=filters,  # hard filter
                 boost_section=section,
                 strict=True if filters else False
             )
@@ -468,23 +653,20 @@ Answer:"""
         # Eğer hala chunk yoksa, normal search yap (intent detection için)
         if not retrieved_chunks:
             # Course code ve section yoksa normal search
-            # Görsel: General query guard - Course code yoksa ve intent belirsizse, çok sıkı filtreleme
-            # Görsel: "if retrieved_chunks < MIN_THRESHOLD: DO NOT call LLM, return 'Dataset-based answer not available'"
+            # General query guard: if no course code and intent is unclear, be strict to avoid hallucinations.
             if not code and intent_detected in ["core_courses", "important_courses", "mandatory_courses"]:
-                # Görsel: Core courses için section filter ekle
-                # Görsel: "restrict retrieval to: department == 'Software Engineering' AND section in ['description', 'objectives']"
-                # Görsel: Core courses için course_type='Mandatory' filter ekle ve genel dersleri (TURK, IUE, HIST) filtrele
+                # For mandatory/core-like queries: enforce department, restrict to description/objectives,
+                # and exclude general-education courses.
                 retrieved_chunks = self.retrieve(
                     query=enhanced_query,
                     n_results=n_results * 3,  # Daha fazla sonuç al, sonra filtrele
-                    department_filter=department_filter,  # Görsel: Department filter zorunlu
-                    course_type_filter='Mandatory',  # Görsel: Sadece Mandatory courses (core courses)
+                    department_filter=department_filter,
+                    course_type_filter='Mandatory',
                     filters=None,
                     boost_section=None,
                     strict=False
                 )
-                # Görsel: Section filter - sadece description ve objectives
-                # Görsel: Genel dersleri filtrele (TURK, IUE, HIST, ENG gibi genel eğitim dersleri)
+                # Keep only description/objectives; exclude general-education courses.
                 if retrieved_chunks:
                     filtered_chunks = []
                     excluded_codes = ['TURK', 'IUE', 'HIST', 'ENG101', 'ENG102', 'ENG210', 'TURK100', 'IUE100', 'HIST100']  # Genel eğitim dersleri
@@ -507,7 +689,7 @@ Answer:"""
                         # Eğer description/objectives yoksa, tüm section'ları kullan (fallback)
                         logger.warning(f"No chunks found in description/objectives sections, using all sections")
             elif not code and not intent_detected:
-                # Görsel: Intent belirsiz, course code yok → Çok sıkı filtreleme
+                # Intent unclear, no course code → strict retrieval
                 # Department filter zorunlu (eğer belirtilmişse)
                 if department_filter:
                     # Department filter ile arama yap
@@ -521,7 +703,7 @@ Answer:"""
                         strict=False
                     )
                 else:
-                    # Görsel: "Retriever her şeyi getiriyor" → Çok geniş arama, guard gerekli
+                    # Broad search; guard logic below prevents hallucinations.
                     retrieved_chunks = self.retrieve(
                         query=enhanced_query,
                         n_results=n_results,
@@ -544,15 +726,14 @@ Answer:"""
                 )
         
         # Görsel (3): "Veri yok" guard hâlâ %100 değil
-        # Görsel: "az context ile tahmin yapmaya devam eder" → Bu da hallucination kapısıdır
+        # Similarity + minimum context checks (hallucination prevention)
         max_similarity = max((d.get('similarity', 0) for d in retrieved_chunks), default=0) if retrieved_chunks else 0
-        min_chunks_for_context = 3  # Görsel: Az context ile LLM tahmin yapmaya devam eder
+        min_chunks_for_context = 3
         
-        # Görsel: General query guard - "if retrieved_chunks < MIN_THRESHOLD: DO NOT call LLM"
-        # Görsel: "Bu satır hallucination'ı %90 keser"
-        MIN_THRESHOLD = 5  # Görsel: Minimum chunk sayısı
+        # General query guard - do not call LLM with too little evidence
+        MIN_THRESHOLD = 5  # minimum chunk count
         if not code and not intent_detected:
-            # Görsel: Course code yok, intent belirsiz → Çok sıkı guard
+            # No course code, intent unclear → strict guard
             if len(retrieved_chunks) < MIN_THRESHOLD:
                 logger.warning(f"General query guard triggered: chunks={len(retrieved_chunks)} < MIN_THRESHOLD={MIN_THRESHOLD}, intent={intent_detected}")
                 tr = "Bu soru için yeterli veri bulunamadı. Lütfen daha spesifik bir soru sorun (örneğin, bir ders kodu belirtin)."
@@ -565,12 +746,9 @@ Answer:"""
                     'num_results': len(retrieved_chunks)
                 }
         
-        # Görsel: Guard logic - Dataset fallback kontrolü
-        # Görsel: "3) Guard (Veri yok) sadece gerçekten hiçbir şey yoksa"
-        # Görsel: "if not docs or max_similarity < MIN_SIM: if dataset_has(course_code, section): use dataset value directly"
+        # Guard logic + dataset fallback
         if not retrieved_chunks or max_similarity < 0.30 or len(retrieved_chunks) < min_chunks_for_context:
-            # Görsel: Eğer JSON'da **credits** var ama retriever çağırmadıysa
-            # Görsel: ÖNCE dataset fallback kontrolü yap (guard'dan önce)
+            # If dataset has the requested section, return it directly.
             if code and requested_section:
                 dataset_value = self._dataset_lookup(course_code=code, section=requested_section)
                 if dataset_value:
@@ -586,7 +764,7 @@ Answer:"""
                         'num_results': 0
                     }
             
-            # Görsel: Similarity düşükse VEYA az context varsa LLM'e gitmeden kesin guard
+            # Low similarity or low context: return no-data without calling LLM
             logger.warning(f"Guard triggered: chunks={len(retrieved_chunks)}, max_similarity={max_similarity:.3f}")
             return {
                 'query': query,
@@ -599,8 +777,7 @@ Answer:"""
         # Step 2: Generate context
         context = self.generate_context(retrieved_chunks)
 
-        # Görsel: Review of the Semester Guard (Hallucination Prevention)
-        # Görsel: Eğer context sadece "Review of the Semester" içeriyorsa, LLM uydurmasın diye engelle
+        # "Review of the Semester" guard (hallucination prevention)
         if "Review of the Semester" in context and context.count("Review of the Semester") > 2:
             # Check if meaningful content exists
             meaningful_content = context.replace("Review of the Semester", "").replace("Week", "").replace("Introduction", "")
@@ -619,10 +796,9 @@ Answer:"""
                     'num_results': len(retrieved_chunks)
                 }
         
-        # Görsel: Context çok kısa ise (az context) yine guard
-        # Görsel: Ama eğer weekly_topics sorgusuysa ve chunks varsa, context kısa olsa bile devam et
+        # Short-context guard (weekly_topics is allowed if chunks exist)
         is_weekly_topics_query = "haftalık" in query.lower() or "weekly" in query.lower()
-        # Görsel: Weekly topics sorgusu için chunks varsa context kısa olsa bile devam et
+        # Weekly topics: proceed even if context is short, as long as chunks exist.
         if len(context.strip()) < 100 and not (is_weekly_topics_query and retrieved_chunks):  # Çok kısa context (weekly topics + chunks varsa hariç)
             logger.warning(f"Context too short ({len(context)} chars), returning no_data_answer")
             return {
@@ -636,9 +812,7 @@ Answer:"""
         # Step 3: Generate response
         response = self.generate_response(query, context)
         
-        # Görsel: Fallback mekanizması - Partial answer işaretleme
-        # Görsel: "Ve cevapta şunu ekle: Bu ders için kredi bilgisi veri setinde doğrudan bulunamadığı için..."
-        # Görsel: Ama eğer dataset'te varsa partial answer ekleme (çünkü zaten dataset fallback'te direkt cevap verdik)
+        # Mark fallback answers as partial (unless dataset has exact value).
         if mark_as_partial and requested_section:
             # Dataset'te kontrol et - eğer varsa partial answer ekleme
             if not dataset_value:  # Yukarıda zaten kontrol edildi
@@ -658,13 +832,10 @@ Answer:"""
                 # Dataset'te var, partial answer ekleme (zaten exact bilgi var)
                 logger.info(f"Dataset has exact data for {code}, section={requested_section}, not marking as partial")
         
-        # Görsel: TR+EN format assertion (Kod seviyesinde garanti)
-        # Görsel: "assert 'ANSWER (TR)' in answer" ve "assert 'ANSWER (EN)' in answer"
-        # Görsel: "LLM 'unutursa' sistem çöker" → Kod seviyesinde kontrol
-        # Görsel: "Prompt'a güvenmek yeterli değil" → Kod seviyesinde garanti
+        # Enforce TR+EN format at code level (do not trust the prompt alone).
         response_upper = response.upper()
         
-        # Görsel: Kod seviyesinde assertion (main.py'de değil, burada)
+        # Code-level assertion (enforced here, not in main.py)
         has_tr = "ANSWER (TR)" in response_upper or "CEVAP (TR)" in response_upper
         has_en = "ANSWER (EN)" in response_upper or "CEVAP (EN)" in response_upper
         
@@ -684,9 +855,7 @@ Answer:"""
                 logger.warning("LLM returned single language, duplicating for TR+EN format")
                 response = format_answer(response, response)
         
-        # Görsel: Final assertion (kod seviyesinde garanti)
-        # Görsel: "LLM bir gün tek dil döner ve sistem 'sessizce bozulur'" → Assert ile önle
-        # Görsel: "if 'ANSWER (TR)' not in answer or 'ANSWER (EN)' not in answer: raise RuntimeError('Bilingual output violation')"
+        # Final code-level bilingual assertion
         final_check = response.upper()
         if "ANSWER (TR)" not in final_check and "CEVAP (TR)" not in final_check:
             raise RuntimeError("Bilingual output violation: TR section missing in response - system guarantee failed")
@@ -800,8 +969,7 @@ Answer:"""
     
     def _load_dataset(self) -> Dict:
         """
-        Görsel: Dataset fallback - JSON'dan direkt okuma
-        Görsel: "Dataset fallback → sadece gerçekten yoksa"
+        Dataset fallback - load `scraped_courses.json` and flatten into a course_code -> course dict.
         
         Returns:
             Dictionary with course data from JSON files
@@ -818,7 +986,7 @@ Answer:"""
                     all_data = json.load(f)
                 
                 # Flatten department structure
-                # Görsel: Nested course'ları da ekle (parent_course field'ı olan course'lar)
+                # Include nested courses and also expand `available_courses` into standalone entries.
                 for dept_key, courses in all_data.items():
                     for course in courses:
                         course_code = course.get('course_code', '')
@@ -827,10 +995,10 @@ Answer:"""
                         # Normalize course code (remove spaces, uppercase)
                         normalized_code = course_code.replace(' ', '').upper()
                         if normalized_code:
-                            # Görsel: Nested course'ları da dataset'e ekle (SE420, GER101, GEET312 gibi)
+                            # Add direct course entries (including nested ones if present)
                             dataset[normalized_code] = course
                         
-                        # Görsel: available_courses içindeki nested course'ları da ayrı course olarak ekle
+                        # Expand `available_courses` items into standalone dataset entries
                         # (Eğer zaten ayrı course olarak eklenmemişse)
                         available_courses = course.get('available_courses', [])
                         for nested in available_courses:
@@ -875,8 +1043,7 @@ Answer:"""
     
     def _dataset_lookup(self, course_code: str, section: str) -> Optional[Dict]:
         """
-        Görsel: Dataset lookup - JSON'dan direkt değer okuma
-        Görsel: "dataset_lookup(course_code='SE115', section='credits') -> found"
+        Dataset lookup - deterministic answers from JSON (credits / weekly_topics).
         
         Args:
             course_code: Normalized course code (e.g., "SE115")
@@ -893,7 +1060,7 @@ Answer:"""
         
         course = dataset[normalized_code]
         
-        # Görsel: Section'a göre değer bul
+        # Read section-specific values
         if section == "credits":
             ects = course.get('ects')
             local_credits = course.get('local_credits')
@@ -907,23 +1074,29 @@ Answer:"""
         elif section == "weekly_topics":
             weekly_topics = course.get('weekly_topics', [])
             if weekly_topics:
-                # Görsel: Tüm haftaları formatla
-                topics_list = []
+                # Format all weeks (TR and EN separately, same factual content)
+                tr_topics_list = []
+                en_topics_list = []
                 for t in weekly_topics:
                     week = t.get('week', '')
                     topic = t.get('topic', '')
                     required_materials = t.get('required_materials', '')
                     if week and topic:
-                        topic_line = f"Hafta {week}: {topic}"
+                        # Not: "topic" ve "required_materials" kaynak metindir; çevirmiyoruz (uydurma ve bozuk TR riskini azaltır)
+                        tr_line = f"Hafta {week}: {topic}"
+                        en_line = f"Week {week}: {topic}"
                         if required_materials:
-                            topic_line += f"\nGerekli Materyaller: {required_materials}"
-                        topics_list.append(topic_line)
+                            tr_line += f"\nGerekli materyal: {required_materials}"
+                            en_line += f"\nRequired Materials: {required_materials}"
+                        tr_topics_list.append(tr_line)
+                        en_topics_list.append(en_line)
                 
-                topics_text = "\n".join(topics_list)
+                tr_topics_text = "\n".join(tr_topics_list)
+                en_topics_text = "\n".join(en_topics_list)
                 return {
-                    'value': topics_text,
-                    'tr': f"{course_code} dersinin haftalık konuları:\n{topics_text}",
-                    'en': f"{course_code} course weekly topics:\n{topics_text}"
+                    'value': en_topics_text,
+                    'tr': f"{course_code} dersinin haftalık konuları:\n{tr_topics_text}",
+                    'en': f"{course_code} weekly topics:\n{en_topics_text}"
                 }
         
         return None

@@ -53,7 +53,7 @@ class RAGEvaluator:
         department_filter = question.get('department_filter')
         course_type_filter = question.get('course_type_filter')
         
-        # Extract course code from query (ÇÖZÜM: Course code detection)
+        # Extract course code from query (for hard filtering)
         import re
         pattern = r'\b([A-Z]{2,4})\s*(\d{3,4})\b'
         match = re.search(pattern, query.upper())
@@ -75,7 +75,7 @@ class RAGEvaluator:
         
         actual_answer = result.get('response', '')
         
-        # ÇÖZÜM: Trap question kontrolü (HALLUCINATION BİTER)
+        # Trap-question check (hallucination detection)
         is_trap = category == 'trap'
         if is_trap:
             # Trap question'larda "bulunmamaktadır" kontrolü
@@ -134,7 +134,7 @@ class RAGEvaluator:
         }
     
     def _calculate_aggregate_metrics(self, results: List[Dict]) -> Dict:
-        """Calculate aggregate metrics across all questions (Görsel: Hallucination / accuracy metrikleri eklendi)"""
+        """Calculate aggregate metrics across all questions."""
         total = len(results)
         if total == 0:
             return {}
@@ -142,13 +142,13 @@ class RAGEvaluator:
         # Calculate averages
         avg_retrieval_accuracy = sum(r['metrics'].get('retrieval_accuracy', 0) for r in results) / total
         avg_groundedness = sum(r['metrics'].get('groundedness', 0) for r in results) / total
-        avg_accuracy = sum(r['metrics'].get('accuracy', 0) for r in results) / total  # Görsel: accuracy metrikleri
+        avg_accuracy = sum(r['metrics'].get('accuracy', 0) for r in results) / total
         
         # Count hallucinations (low groundedness or explicit hallucination flag)
         hallucinations = sum(1 for r in results if r['metrics'].get('is_hallucination', False) or r['metrics'].get('groundedness', 1) < 0.5)
         hallucination_rate = hallucinations / total
         
-        # TR+EN format compliance (Görsel: TR+EN enforce testleri)
+        # TR+EN format compliance
         tr_en_compliant = sum(1 for r in results if r['metrics'].get('tr_en_format', {}).get('format_compliant', False))
         tr_en_compliance_rate = tr_en_compliant / total if total > 0 else 0.0
         
@@ -161,10 +161,10 @@ class RAGEvaluator:
         return {
             'average_retrieval_accuracy': avg_retrieval_accuracy,
             'average_groundedness': avg_groundedness,
-            'average_accuracy': avg_accuracy,  # Görsel: accuracy metrikleri
+            'average_accuracy': avg_accuracy,
             'hallucination_rate': hallucination_rate,
             'total_hallucinations': hallucinations,
-            'tr_en_compliance_rate': tr_en_compliance_rate,  # Görsel: TR+EN enforce testleri
+            'tr_en_compliance_rate': tr_en_compliance_rate,
             'total_tr_en_compliant': tr_en_compliant,
             'category_distribution': category_counts
         }

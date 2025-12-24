@@ -174,7 +174,7 @@ def run_full_pipeline(
         embedder=embedder,
         llm_provider=llm_provider,
         model_name=model_name,
-        data_dir=str(output_path)  # Görsel: Dataset fallback için data_dir ekle
+        data_dir=str(output_path)  # Enable JSON dataset fallback
     )
     
     logger.info("="*60)
