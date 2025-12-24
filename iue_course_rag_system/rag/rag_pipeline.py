@@ -453,7 +453,6 @@ Answer:"""
                         mark_as_partial = True
                         logger.info(f"Fallback successful: found {len(retrieved_chunks)} chunks for {code}")
         
-        # Görsel: SONRA - Similarity search (eğer exact lookup sonuç vermezse)
         if not retrieved_chunks:
             # Görsel: "Similarity search → sonra"
             retrieved_chunks = self.retrieve(
@@ -532,12 +531,12 @@ Answer:"""
                         boost_section=section,
                         strict=False
                     )
-        else:
+            else:
                 # Normal search (code var ama filters yok)
-            retrieved_chunks = self.retrieve(
-                query=enhanced_query,
-                n_results=n_results,
-                department_filter=department_filter,
+                retrieved_chunks = self.retrieve(
+                    query=enhanced_query,
+                    n_results=n_results,
+                    department_filter=department_filter,
                     course_type_filter=course_type_filter,
                     filters=None,
                     boost_section=section,
@@ -599,6 +598,26 @@ Answer:"""
         
         # Step 2: Generate context
         context = self.generate_context(retrieved_chunks)
+
+        # Görsel: Review of the Semester Guard (Hallucination Prevention)
+        # Görsel: Eğer context sadece "Review of the Semester" içeriyorsa, LLM uydurmasın diye engelle
+        if "Review of the Semester" in context and context.count("Review of the Semester") > 2:
+            # Check if meaningful content exists
+            meaningful_content = context.replace("Review of the Semester", "").replace("Week", "").replace("Introduction", "")
+            # Remove digits and common words
+            meaningful_content = re.sub(r'\d+', '', meaningful_content)
+            
+            if len(meaningful_content.strip()) < 150: # Arbitrary threshold for "low information"
+                logger.warning("Review of the Semester guard triggered: content is mostly empty placeholders")
+                tr = "Bu dersin haftalık programı kaynak sistemde 'Review of the Semester' olarak belirtilmiştir, detaylı konular mevcut değildir."
+                en = "The weekly schedule for this course is listed as 'Review of the Semester' in the source system; detailed topics are not available."
+                return {
+                    'query': query,
+                    'retrieved_chunks': retrieved_chunks,
+                    'context': context,
+                    'response': format_answer(tr, en),
+                    'num_results': len(retrieved_chunks)
+                }
         
         # Görsel: Context çok kısa ise (az context) yine guard
         # Görsel: Ama eğer weekly_topics sorgusuysa ve chunks varsa, context kısa olsa bile devam et

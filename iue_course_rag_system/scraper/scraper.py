@@ -711,15 +711,15 @@ class IUECourseScraper:
                             if scraped_course_codes is not None:
                                 scraped_course_codes.add(elective_code)
                             if course_detail.get('course_name'):
-                            elective.update({
-                                'objectives': course_detail.get('objectives', ''),
-                                'description': course_detail.get('description', ''),
-                                'weekly_topics': course_detail.get('weekly_topics', []),
-                                'learning_outcomes': course_detail.get('learning_outcomes', []),
-                                'assessment': course_detail.get('assessment', {}),
-                                'ects_workload': course_detail.get('ects_workload', {}),
-                                'prerequisites': course_detail.get('prerequisites', '')
-                            })
+                                elective.update({
+                                    'objectives': course_detail.get('objectives', ''),
+                                    'description': course_detail.get('description', ''),
+                                    'weekly_topics': course_detail.get('weekly_topics', []),
+                                    'learning_outcomes': course_detail.get('learning_outcomes', []),
+                                    'assessment': course_detail.get('assessment', {}),
+                                    'ects_workload': course_detail.get('ects_workload', {}),
+                                    'prerequisites': course_detail.get('prerequisites', '')
+                                })
                     
                     # Check if this elective course is already added (avoid duplicates)
                     elec_code = elective.get('course_code', '')
@@ -1233,7 +1233,7 @@ class IUECourseScraper:
                     
                     # Check for duplicates before adding (normalized code ile)
                     if not any(c.get('course_code') == normalized_code for c in nested_courses):
-                    nested_courses.append(nested_course)
+                        nested_courses.append(nested_course)
         
         # Get minimum ECTS requirement
         min_ects = None
@@ -2035,7 +2035,71 @@ class IUECourseScraper:
                         if elec_semester:
                             course_detail['description'] += f" Semester: {elec_semester}."
         
+        
+        # Special handling for SFL courses since web page is empty
+        if course_code.startswith('SFL') and not course_detail.get('available_courses'):
+            # Extract section from URL or default to sfl
+            section_match = re.search(r'section=([^&]+)', course_url)
+            section = section_match.group(1) if section_match else 'sfl.ieu.edu.tr'
+            course_detail['available_courses'] = self._generate_sfl_subcourses(course_code, section)
+
         return course_detail
+
+    def _generate_sfl_subcourses(self, sfl_code: str, section: str) -> List[Dict]:
+        """Generate nested language courses for SFL parent courses"""
+        
+        # Mapping based on user provided images and verification
+        # SFL 1013 (I) -> FR 103, ITL 103, others 101
+        # SFL 1024 (II) -> FR 104, ITL 104, others 102
+        # SFL 201 (III) -> All 201
+        # SFL 202 (IV) -> All 202
+        
+        sub_codes = []
+        
+        if "101" in sfl_code: # SFL 1013
+            # Special start levels for FR and ITL
+            sub_codes = ["FR 103", "ITL 103", "GER 101", "RUS 101", "SPN 101", "JPN 101", "CHN 101"]
+        elif "102" in sfl_code: # SFL 1024
+            sub_codes = ["FR 104", "ITL 104", "GER 102", "RUS 102", "SPN 102", "JPN 102", "CHN 102"] 
+        elif "201" in sfl_code:
+            sub_codes = ["FR 201", "ITL 201", "GER 201", "RUS 201", "SPN 201", "JPN 201", "CHN 201"]
+        elif "202" in sfl_code:
+             sub_codes = ["FR 202", "ITL 202", "GER 202", "RUS 202", "SPN 202", "JPN 202", "CHN 202"]
+        
+        if not sub_codes:
+            return []
+            
+        subcourses = []
+        
+        for code in sub_codes:
+            # Extract language name and level for display (Approximate)
+            lang = code.split(' ')[0]
+            level = code.split(' ')[1]
+            
+            # Map code to likely full name for better UX
+            lang_map = {
+                "FR": "French", "ITL": "Italian", "GER": "German", 
+                "RUS": "Russian", "SPN": "Spanish", "JPN": "Japanese", "CHN": "Chinese"
+            }
+            lang_name = lang_map.get(lang, lang)
+            
+            # Construct URL
+            # section=sfl.ieu.edu.tr is required
+            url = f"{self.BASE_URL}/syllabus.php?section=sfl.ieu.edu.tr&course_code={code.replace(' ', '%20')}"
+            
+            subcourses.append({
+                "course_code": code,
+                "course_name": f"{lang_name} Language {level}", # e.g. French Language 103
+                "detail_url": url,
+                "semester": "Fall" if int(level[-1]) % 2 != 0 else "Spring", # Odd=Fall, Even=Spring
+                "department_key": "sfl",
+                "ects": "3" if level.startswith("1") else "4", # 1st year 3, 2nd year 4 ECTS usually
+                "local_credits": "3",
+                "type": "Elective"
+            })
+            
+        logger.info(f"Generated {len(subcourses)} nested language courses for {sfl_code}")
+        return subcourses
     
     def scrape_department(self, dept_key: str, global_scraped_course_codes: set = None) -> List[Dict]:
         """
@@ -2100,11 +2164,11 @@ class IUECourseScraper:
                 # POOL courses are already extracted with nested courses
                 detail = {}
             elif course.get('detail_url'):
-            detail = self.scrape_course_detail(
-                course['detail_url'],
+                detail = self.scrape_course_detail(
+                    course['detail_url'],
                     course_code,
                     scraped_course_codes
-            )
+                )
             
             # Merge curriculum info with detail info
             merged_course = {**course, **detail}
@@ -2137,16 +2201,16 @@ class IUECourseScraper:
                         logger.warning(f"Nested course has no course_code, skipping")
                         continue
                     
-                        # Check if already scraped (cross-department check)
-                        if nested_code in scraped_course_codes:
-                            logger.debug(f"Skipping duplicate nested course (already scraped): {nested_code}")
+                    # Check if already scraped (cross-department check)
+                    if nested_code in scraped_course_codes:
+                        logger.debug(f"Skipping duplicate nested course (already scraped): {nested_code}")
                         filtered_nested.append(nested)  # Still add to filtered_nested for parent course
-                            continue
+                        continue
                         
                     # Görsel: Nested course detaylarını KESİNLİKLE çek (SFL, ELEC, POOL nested course'ları için)
                     # Görsel: "Ama hiçbir zaman detail page scrape edilmiyor" → ŞİMDİ ÇEKİLECEK
-                        nested_url = nested.get('detail_url', '')
-                        if nested_url:
+                    nested_url = nested.get('detail_url', '')
+                    if nested_url:
                         # Görsel: Detaylar yoksa veya eksikse MUTLAKA çek
                         needs_scraping = (
                             not nested.get('objectives') or 
