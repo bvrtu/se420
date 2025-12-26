@@ -14,6 +14,49 @@ logger = logging.getLogger(__name__)
 
 class RAGEvaluator:
     """Evaluates RAG system performance"""
+
+    @staticmethod
+    def _trap_passed(actual_answer: str) -> bool:
+        """
+        Trap questions should be answered negatively (no hallucinated affirmative claims).
+        Accept either an explicit "no data / not offered" style answer or a clear "no".
+        """
+        if not actual_answer:
+            return False
+
+        a = actual_answer.lower()
+
+        negative_markers = [
+            # Turkish
+            "bulunmamaktadır",
+            "mevcut değildir",
+            "sunmamaktadır",
+            "yoktur",
+            "hayır",
+            # English
+            "not available",
+            "not offered",
+            "does not offer",
+            "there is no",
+            "no such",
+            "no.",
+            "no ",
+        ]
+        affirmative_markers = [
+            "evet",
+            "vardır",
+            "mevcuttur",
+            "sunmaktadır",
+            "yes",
+            "offered",
+            "there is a",
+        ]
+
+        has_negative = any(m in a for m in negative_markers)
+        has_affirmative = any(m in a for m in affirmative_markers)
+
+        # If both appear, treat as failed (ambiguous / potentially hallucinated)
+        return has_negative and not has_affirmative
     
     def __init__(self, rag_pipeline, questions_file: Optional[str] = None):
         """
@@ -75,12 +118,9 @@ class RAGEvaluator:
         
         actual_answer = result.get('response', '')
         
-        # Trap-question check (hallucination detection)
+        # Trap-question check (should be negative)
         is_trap = category == 'trap'
-        if is_trap:
-            # Trap question'larda "bulunmamaktadır" kontrolü
-            assert "bulunmamaktadır" in actual_answer.lower() or "not available" in actual_answer.lower() or "not found" in actual_answer.lower(), \
-                f"Trap question should contain 'bulunmamaktadır' or 'not available'. Got: {actual_answer[:100]}"
+        trap_passed = self._trap_passed(actual_answer) if is_trap else None
         
         # Calculate metrics
         metrics = calculate_metrics(
@@ -97,6 +137,8 @@ class RAGEvaluator:
             'retrieved_chunks_count': result.get('num_results', 0),
             'metrics': metrics,
             'is_trap': is_trap
+            ,
+            'trap_passed': trap_passed
         }
     
     def evaluate_all(self, questions: Optional[List[Dict]] = None) -> Dict:
@@ -121,8 +163,22 @@ class RAGEvaluator:
         results = []
         for i, question in enumerate(questions, 1):
             logger.info(f"Evaluating question {i}/{len(questions)}: {question.get('question', '')[:50]}...")
-            result = self.evaluate_question(question)
-            results.append(result)
+            try:
+                result = self.evaluate_question(question)
+                results.append(result)
+            except Exception as e:
+                logger.exception(f"Error evaluating question {i}: {e}")
+                results.append({
+                    'question': question.get('question', ''),
+                    'category': question.get('category', 'unknown'),
+                    'expected_answer': question.get('expected_answer', ''),
+                    'actual_answer': '',
+                    'retrieved_chunks_count': 0,
+                    'metrics': {},
+                    'is_trap': question.get('category') == 'trap',
+                    'trap_passed': False if question.get('category') == 'trap' else None,
+                    'error': str(e),
+                })
         
         # Calculate aggregate metrics
         aggregate_metrics = self._calculate_aggregate_metrics(results)
@@ -139,13 +195,29 @@ class RAGEvaluator:
         if total == 0:
             return {}
         
-        # Calculate averages
-        avg_retrieval_accuracy = sum(r['metrics'].get('retrieval_accuracy', 0) for r in results) / total
-        avg_groundedness = sum(r['metrics'].get('groundedness', 0) for r in results) / total
-        avg_accuracy = sum(r['metrics'].get('accuracy', 0) for r in results) / total
-        
-        # Count hallucinations (low groundedness or explicit hallucination flag)
-        hallucinations = sum(1 for r in results if r['metrics'].get('is_hallucination', False) or r['metrics'].get('groundedness', 1) < 0.5)
+        # Calculate averages (ignore None values)
+        ra_vals = [r.get('metrics', {}).get('retrieval_accuracy') for r in results]
+        ra_vals = [v for v in ra_vals if isinstance(v, (int, float))]
+        grounded_vals = [r.get('metrics', {}).get('groundedness') for r in results]
+        grounded_vals = [v for v in grounded_vals if isinstance(v, (int, float))]
+        acc_vals = [r.get('metrics', {}).get('accuracy') for r in results]
+        acc_vals = [v for v in acc_vals if isinstance(v, (int, float))]
+
+        avg_retrieval_accuracy = sum(ra_vals) / len(ra_vals) if ra_vals else 0.0
+        avg_groundedness = sum(grounded_vals) / len(grounded_vals) if grounded_vals else 0.0
+        avg_accuracy = sum(acc_vals) / len(acc_vals) if acc_vals else 0.0
+
+        # Count hallucinations
+        # - Trap questions: fail if trap_passed is False
+        # - Others: use metrics.is_hallucination
+        hallucinations = 0
+        for r in results:
+            if r.get('category') == 'trap':
+                if r.get('trap_passed') is False:
+                    hallucinations += 1
+            else:
+                if r.get('metrics', {}).get('is_hallucination', False):
+                    hallucinations += 1
         hallucination_rate = hallucinations / total
         
         # TR+EN format compliance
@@ -162,6 +234,9 @@ class RAGEvaluator:
             'average_retrieval_accuracy': avg_retrieval_accuracy,
             'average_groundedness': avg_groundedness,
             'average_accuracy': avg_accuracy,
+            'retrieval_accuracy_n': len(ra_vals),
+            'groundedness_n': len(grounded_vals),
+            'accuracy_n': len(acc_vals),
             'hallucination_rate': hallucination_rate,
             'total_hallucinations': hallucinations,
             'tr_en_compliance_rate': tr_en_compliance_rate,

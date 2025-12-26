@@ -1,0 +1,423 @@
+{
+  "questions": [
+    {
+      "category": "single_department",
+      "question": "What are the core courses in the second year of Software Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "single_department",
+      "question": "What are the core courses in the third year of Computer Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Computer Engineering"
+    },
+    {
+      "category": "single_department",
+      "question": "What are the core courses in the second year of Electrical and Electronics Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Electrical and Electronics Engineering"
+    },
+    {
+      "category": "single_department",
+      "question": "What are the core courses in the third year of Industrial Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Industrial Engineering"
+    },
+    {
+      "category": "single_department",
+      "question": "Which mandatory courses are offered in the fifth year of Computer Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Computer Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "single_department",
+      "question": "Which mandatory courses are offered in the fourth year of Software Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Software Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "single_department",
+      "question": "Which mandatory courses are offered in the fourth year of Industrial Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Industrial Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "single_department",
+      "question": "Which courses focus on optimization techniques in Industrial Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Industrial Engineering"
+    },
+    {
+      "category": "single_department",
+      "question": "Which courses focus on embedded systems in Electrical and Electronics Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Electrical and Electronics Engineering"
+    },
+    {
+      "category": "single_department",
+      "question": "Which courses focus on software testing in Software Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 12,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "topic_based",
+      "question": "Which engineering departments offer machine-learning-related courses?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses cover signal processing topics?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 15
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses are related to data analysis or data mining?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses mention optimization or operations research in their description/objectives?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses are about computer networks or networking?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses focus on cybersecurity or information security?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses are related to software engineering project management?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses cover artificial intelligence topics?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses are about databases or data management?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "topic_based",
+      "question": "Which courses focus on embedded systems or microcontrollers?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "List programming-focused courses in Software Engineering and Computer Engineering",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Which department emphasizes data analysis more strongly?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Compare machine learning related course offerings between Software Engineering and Computer Engineering",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Compare signal processing course coverage between Electrical and Electronics Engineering and Computer Engineering",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Compare optimization-related courses between Industrial Engineering and Software Engineering",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Which department offers more courses related to embedded systems: Electrical and Electronics Engineering or Computer Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Compare database-related courses between Software Engineering and Computer Engineering",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Compare cybersecurity-related course offerings between Software Engineering and Computer Engineering",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Which department appears to have a stronger focus on project-based courses: Software Engineering or Industrial Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20
+    },
+    {
+      "category": "cross_department_comparison",
+      "question": "Compare capstone/graduation project style courses across all engineering departments",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 25
+    },
+    {
+      "category": "quantitative",
+      "question": "How many elective courses are offered in the final year of Software Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20,
+      "department_filter": "Software Engineering",
+      "course_type_filter": "Elective"
+    },
+    {
+      "category": "quantitative",
+      "question": "How many elective courses are offered in the final year of Computer Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20,
+      "department_filter": "Computer Engineering",
+      "course_type_filter": "Elective"
+    },
+    {
+      "category": "quantitative",
+      "question": "How many elective courses are offered in the final year of Electrical and Electronics Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20,
+      "department_filter": "Electrical and Electronics Engineering",
+      "course_type_filter": "Elective"
+    },
+    {
+      "category": "quantitative",
+      "question": "How many elective courses are offered in the final year of Industrial Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20,
+      "department_filter": "Industrial Engineering",
+      "course_type_filter": "Elective"
+    },
+    {
+      "category": "quantitative",
+      "question": "Which academic year has the highest total ECTS load?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 25
+    },
+    {
+      "category": "quantitative",
+      "question": "How many mandatory courses are offered in the second year of Software Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20,
+      "department_filter": "Software Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "quantitative",
+      "question": "How many mandatory courses are offered in the third year of Computer Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 20,
+      "department_filter": "Computer Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "quantitative",
+      "question": "How many courses (mandatory + elective) exist in the dataset for Software Engineering?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 25,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "quantitative",
+      "question": "How many courses in the dataset are labeled as Elective across all departments?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 25
+    },
+    {
+      "category": "quantitative",
+      "question": "How many distinct course codes are present in the dataset across all departments?",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "n_results": 25
+    },
+    {
+      "category": "trap",
+      "question": "Does the Software Engineering department offer a course on Quantum Thermodynamics?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a compulsory course on Astrophysics in Computer Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Computer Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "trap",
+      "question": "Does Electrical and Electronics Engineering offer a course on Ancient Greek Philosophy?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Electrical and Electronics Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Medieval Literature in Industrial Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Industrial Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Does Software Engineering offer a course titled 'Dragon Engineering'?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Marine Biology in Computer Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Computer Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a mandatory course on Zoology in Electrical and Electronics Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Electrical and Electronics Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a mandatory course on Archaeology in Industrial Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Industrial Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "trap",
+      "question": "Does Software Engineering offer a course on Quantum Field Theory?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Does Computer Engineering offer a course on Black Hole Thermodynamics?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Computer Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Renaissance Art History in Electrical and Electronics Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Electrical and Electronics Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Astrobiology in Industrial Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Industrial Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a mandatory course on Meteorology in Software Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Software Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a compulsory course on Botany in Computer Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Computer Engineering",
+      "course_type_filter": "Mandatory"
+    },
+    {
+      "category": "trap",
+      "question": "Does Electrical and Electronics Engineering offer a course on Mythology Studies?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Electrical and Electronics Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Culinary Arts in Industrial Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Industrial Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Does Software Engineering offer a course on Veterinary Medicine?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Software Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Oceanography in Computer Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Computer Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Is there a course on Paleontology in Electrical and Electronics Engineering?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Electrical and Electronics Engineering"
+    },
+    {
+      "category": "trap",
+      "question": "Does Industrial Engineering offer a course on Space Archaeology?",
+      "expected_answer": "No",
+      "n_results": 10,
+      "department_filter": "Industrial Engineering"
+    }
+  ],
+  "total_questions": 60,
+  "categories": {
+    "single_department": 10,
+    "topic_based": 10,
+    "cross_department_comparison": 10,
+    "quantitative": 10,
+    "trap": 20
+  }
+}

@@ -1,0 +1,1464 @@
+{
+  "total_questions": 60,
+  "results": [
+    {
+      "question": "What are the core courses in the second year of Software Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nSoftware Engineering bölümünde 2. sınıf için (veri setine göre) temel/zorunlu dersler:\n- CE215: Discrete Mathematics for Computer Science\n- CE221: Data Structures and Algorithms I\n- CE223: Database Systems\n- ENG210: Technical English for Engineers\n- GBE251: Introduction to Biology for Non-majors\n- HIST100: Principles of Atatürk and History of Revolution\n- MATH240: Probability for Engineers\n- SE209: Concepts of Software Engineering\n- SE216: Software Project Management\n- SE226: Advanced Programming\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nCore/mandatory courses in Software Engineering for Year 2 (based on the dataset):\n- CE215: Discrete Mathematics for Computer Science\n- CE221: Data Structures and Algorithms I\n- CE223: Database Systems\n- ENG210: Technical English for Engineers\n- GBE251: Introduction to Biology for Non-majors\n- HIST100: Principles of Atatürk and History of Revolution\n- MATH240: Probability for Engineers\n- SE209: Concepts of Software Engineering\n- SE216: Software Project Management\n- SE226: Advanced Programming\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "What are the core courses in the third year of Computer Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nComputer Engineering bölümünde 3. sınıf için (veri setine göre) temel/zorunlu dersler:\n- CE316: Programming Paradigms\n- CE323: Operating System Concepts\n- SE302: Principles of Software Engineering\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nCore/mandatory courses in Computer Engineering for Year 3 (based on the dataset):\n- CE316: Programming Paradigms\n- CE323: Operating System Concepts\n- SE302: Principles of Software Engineering\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "What are the core courses in the second year of Electrical and Electronics Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nElectrical and Electronics Engineering bölümünde 2. sınıf için (veri setine göre) temel/zorunlu dersler:\n- EEE207: Electric Circuit Analysis I\n- EEE208: Electric Circuit Analysis II\n- EEE213: Computational Methods for Engineers\n- EEE232: Microelectronic Devices and Circuits\n- EEE281: Engineering Mathematics I\n- EEE282: Engineering Mathematics II\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nCore/mandatory courses in Electrical and Electronics Engineering for Year 2 (based on the dataset):\n- EEE207: Electric Circuit Analysis I\n- EEE208: Electric Circuit Analysis II\n- EEE213: Computational Methods for Engineers\n- EEE232: Microelectronic Devices and Circuits\n- EEE281: Engineering Mathematics I\n- EEE282: Engineering Mathematics II\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "What are the core courses in the third year of Industrial Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nIndustrial Engineering bölümünde 3. sınıf için (veri setine göre) temel/zorunlu dersler:\n- FENG346: Numerical Methods for Engineers II\n- IE316: Manufacturing Systems\n- IE321: Dynamic and Nonlinear Programming\n- IE322: Work Systems Analysis and Design\n- IE323: Production Planning,Design and Control\n- IE334: Statistical Quality Control\n- IE335: Simulation\n- MATH336: Engineering Statistics II\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nCore/mandatory courses in Industrial Engineering for Year 3 (based on the dataset):\n- FENG346: Numerical Methods for Engineers II\n- IE316: Manufacturing Systems\n- IE321: Dynamic and Nonlinear Programming\n- IE322: Work Systems Analysis and Design\n- IE323: Production Planning,Design and Control\n- IE334: Statistical Quality Control\n- IE335: Simulation\n- MATH336: Engineering Statistics II\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which mandatory courses are offered in the fifth year of Computer Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which mandatory courses are offered in the fourth year of Software Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nSoftware Engineering bölümünde 4. sınıfta (veri setine göre) zorunlu dersler:\n- FENG497: Multidisciplinary Engineering Projects\n- FENG498: Engineering Capstone\n- SEST400: Engineering Summer Training (4 weeks)\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nMandatory courses in Software Engineering in Year 4 (based on the dataset):\n- FENG497: Multidisciplinary Engineering Projects\n- FENG498: Engineering Capstone\n- SEST400: Engineering Summer Training (4 weeks)\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which mandatory courses are offered in the fourth year of Industrial Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nIndustrial Engineering bölümünde 4. sınıfta (veri setine göre) zorunlu dersler:\n- IEST400: Engineering Summer Training (4 weeks)\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nMandatory courses in Industrial Engineering in Year 4 (based on the dataset):\n- IEST400: Engineering Summer Training (4 weeks)\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses focus on optimization techniques in Industrial Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nOptimization tekniklerini Endüstri Mühendisliği'nde odaklanan dersler IE251, IE252, IE357 ve IE358'dir.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nCourses focusing on optimization techniques in Industrial Engineering are IE251, IE252, IE357, and IE358.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 12,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.5625,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 12,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses focus on embedded systems in Electrical and Electronics Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 12,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.21428571428571427,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 12,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses focus on software testing in Software Engineering?",
+      "category": "single_department",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nSE344 ve SE460 coursesında software testleri ile ilgili konular ele alınmaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe course SE344 and SE460 focus on software testing topics in Software Engineering.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 12,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.5,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 12,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which engineering departments offer machine-learning-related courses?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre ilgili dersler şu bölümlerde geçiyor (örnek dersler):\n- Software Engineering (77 ders): CE223: Database Systems, CE304: Operating Systems Security, CE340: Cryptography and Network Security, CE345: Introduction to Machine Learning, CE350: Linux Utilities and Shell Scripting, CE360: Wireless Communications\n- Industrial Engineering (27 ders): ELEC001: Elective Course I, ELEC002: Elective Course II, ELEC003: Elective Course III, ELEC004: Elective Course IV, ELEC005: Elective Course V, ELEC006: Elective Course VI\n- Electrical and Electronics Engineering (24 ders): CHEM100: General Chemistry, EEE282: Engineering Mathematics II, EEE307: Electrical Energy Conversion, EEE322: Engineering Electromagnetics, EEE334: Digital Electronic Circuits, EEE335: Application Development for Internet of Things Systems\n- Computer Engineering (16 ders): CE344: Advanced Machine Learning, CEST400: Engineering Summer Training (4 weeks), EEE461: Embedded System Design, ELEC001: Elective Course I, ELEC002: Elective Course II, ELEC003: Elective Course III\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses appear in these departments (example courses):\n- Software Engineering (77 courses): CE223: Database Systems, CE304: Operating Systems Security, CE340: Cryptography and Network Security, CE345: Introduction to Machine Learning, CE350: Linux Utilities and Shell Scripting, CE360: Wireless Communications\n- Industrial Engineering (27 courses): ELEC001: Elective Course I, ELEC002: Elective Course II, ELEC003: Elective Course III, ELEC004: Elective Course IV, ELEC005: Elective Course V, ELEC006: Elective Course VI\n- Electrical and Electronics Engineering (24 courses): CHEM100: General Chemistry, EEE282: Engineering Mathematics II, EEE307: Electrical Energy Conversion, EEE322: Engineering Electromagnetics, EEE334: Digital Electronic Circuits, EEE335: Application Development for Internet of Things Systems\n- Computer Engineering (16 courses): CE344: Advanced Machine Learning, CEST400: Engineering Summer Training (4 weeks), EEE461: Embedded System Design, ELEC001: Elective Course I, ELEC002: Elective Course II, ELEC003: Elective Course III\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses cover signal processing topics?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nEEE302, EEE416, EEE413, MATH250 ve CE470 coursesında signal processing konuları coveringdedir.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe courses that cover signal processing topics are EEE302, EEE416, EEE413, MATH250 and CE470.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 15,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.5333333333333333,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 15,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses are related to data analysis or data mining?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nANSWER (TR)\nMATH485 Exploratory Data Analysis, CE477 Data Science, IE343 Data Mining, CE477 Data Science, CE477 Data Science, IE329 Lean Production\nExploratory Data Analysis, Data Science, Data Mining, Data Science, Data Science, Lean Production\nThese courses are related to data analysis or data mining. MATH485 Exploratory Data Analysis covers basic approaches in statistical inference and data mining, while CE477 Data Science focuses on developing hands-on data skills by offering a data science project. IE343 Data Mining provides a basic understanding of data mining concepts and uses it in data mining software packages. Additionally, CE477 Data Science covers key data science topics including getting data, visualizing and exploring data, statistical analysis of data, and the use of machine learning.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\n\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.8048780487804879,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses mention optimization or operations research in their description/objectives?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nOptimization ve Optimasyon Araştırma'nın description'inde mentioned olan courseler IE357, IE358, IE252, IE251, IE323, IE329, IE359 ve IE213'dir.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe courses that mention optimization or operations research in their description/objectives are IE357, IE358, IE252, IE251, IE323, IE329, IE359 and IE213.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.5833333333333334,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses are about computer networks or networking?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nKuruların network veya networking ile ilgili olduğu courses listelenecektir.\nCE326 - Computer Networks\nIE359 - Network Optimization\nSE352 - Network Programming in Computer Games\nCE345 - Introduction to Machine Learning\nCE340 - Cryptography and Network Security\nCE470 - Introduction to Neural Networks\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe following courses are about computer networks or networking:\nCE326 - Computer Networks\nIE359 - Network Optimization\nSE352 - Network Programming in Computer Games\nCE345 - Introduction to Machine Learning\nCE340 - Cryptography and Network Security\nCE470 - Introduction to Neural Networks\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.7142857142857143,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses focus on cybersecurity or information security?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nKriptografi ve Ağı Güvenlik course'leri, kriptografi teorileri, algoritalar, sistemler ve kompyuter ağı güvenliği ile ilgili konuları ele alır. Bu kurslar, kompyuter ağı güvenliği ile ilgili konuları ele algebra, matematiksel modelleme, risk management gibi konularda da kapsar.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe courses that focus on cybersecurity or information security are Cryptography and Network Security, which covers cryptography theories, algorithms, and systems, as well as network security mechanisms. These courses also cover topics such as threat analysis, countermeasures, and protection mechanisms to secure computer networks.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.5306122448979592,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses are related to software engineering project management?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nIE372 ve SE216 courses related to software engineering project management.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nIE372 and SE216 courses are related to software engineering project management.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.7777777777777778,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses cover artificial intelligence topics?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nSE354, SE420 ve CE345 courses'unde artificial intelligence konuları coveringdedir.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe courses SE354, SE420 and CE345 cover artificial intelligence topics.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.6666666666666666,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses are about databases or data management?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBilgisayar Bilimleri ve Veri Yönetimi ile ilgili dersler CE223, CE370, SE306 ve IE343'dir.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe courses related to databases or data management are CE223, CE370, SE306 and IE343.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.5,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which courses focus on embedded systems or microcontrollers?",
+      "category": "topic_based",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nEE461 - Ekiplemeli Sistem Tasarımı\nBu ders, 8 ve 32 bit mikrokontrollerlerin temel tasarımcı especificasyonları ve prensiplerini giới thiệu eder; ticari ve bilimsel devre simulyatörlerini kullanır; mikrokontrolör tabanlı elektronik kontrol sistemlerinin hardware ve softwareını tasarlar ve uygulayır.\nEE461 - Embedded System Design\nThis course introduces the basic architectural specifications and principles of 8 and 32 bit microcontrollers; uses commercial and scientific circuit simulators; designs and implements hardware and software for microcontroller based electronic control systems including sensors, actuators and displays.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nEE461 - Embedded System Design\nThis course introduces the basic architectural specifications and principles of 8 and 32 bit microcontrollers; uses commercial and scientific circuit simulators; designs and implements hardware and software for microcontroller based electronic control systems including sensors, actuators and displays.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 20,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 0.44642857142857145,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 20,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "List programming-focused courses in Software Engineering and Computer Engineering",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Software Engineering (47 ders): CE221: Data Structures and Algorithms I, CE223: Database Systems, CE340: Cryptography and Network Security, CE345: Introduction to Machine Learning, CE350: Linux Utilities and Shell Scripting, CE360: Wireless Communications, CE380: Computational Geometry, CE390: Analysis of Algorithms, CE401: Algorithms Design, CE403: Computer Architecture and Organization\n- Computer Engineering (12 ders): CE216: Fundamental Topics in Programming, CE316: Programming Paradigms, CE320: Application Development with MATLAB, CE462: Intoduction to Sparse Representations, CE485: Linear and Integer Programming, EEE461: Embedded System Design, IE342: Decision Theory, IE361: Game Theory, IE373: Software Applications in Industry, MCE420: Automation and Industry 4.0\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Software Engineering (47 courses): CE221: Data Structures and Algorithms I, CE223: Database Systems, CE340: Cryptography and Network Security, CE345: Introduction to Machine Learning, CE350: Linux Utilities and Shell Scripting, CE360: Wireless Communications, CE380: Computational Geometry, CE390: Analysis of Algorithms, CE401: Algorithms Design, CE403: Computer Architecture and Organization\n- Computer Engineering (12 courses): CE216: Fundamental Topics in Programming, CE316: Programming Paradigms, CE320: Application Development with MATLAB, CE462: Intoduction to Sparse Representations, CE485: Linear and Integer Programming, EEE461: Embedded System Design, IE342: Decision Theory, IE361: Game Theory, IE373: Software Applications in Industry, MCE420: Automation and Industry 4.0\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which department emphasizes data analysis more strongly?",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setindeki anahtar kelime eşleşmelerine göre **Software Engineering** bölümünde ilgili ders sayısı daha fazladır.\n\nBölümlere göre eşleşen ders sayıları (örnekler):\n- Industrial Engineering (4 ders): IE327: Special Topics in Production Management, IE334: Statistical Quality Control, IE343: Data Mining, MATH336: Engineering Statistics II\n- Software Engineering (4 ders): CE345: Introduction to Machine Learning, CE477: Data Science, MATH236: Engineering Statistics, MATH485: Exploratory Data Analysis\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on keyword matches in the dataset, **Software Engineering** has more related courses.\n\nMatched course counts by department (with examples):\n- Industrial Engineering (4 courses): IE327: Special Topics in Production Management, IE334: Statistical Quality Control, IE343: Data Mining, MATH336: Engineering Statistics II\n- Software Engineering (4 courses): CE345: Introduction to Machine Learning, CE477: Data Science, MATH236: Engineering Statistics, MATH485: Exploratory Data Analysis\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Compare machine learning related course offerings between Software Engineering and Computer Engineering",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Software Engineering (77 ders): CE223: Database Systems, CE304: Operating Systems Security, CE340: Cryptography and Network Security, CE345: Introduction to Machine Learning, CE350: Linux Utilities and Shell Scripting, CE360: Wireless Communications, CE395: Special Topics in Machine Learning, CE405: Programming for Bioinformatics, CE407: Introduction to Cloud Computing, CE450: Distributed Systems and Parallel Computing\n- Computer Engineering (16 ders): CE344: Advanced Machine Learning, CEST400: Engineering Summer Training (4 weeks), EEE461: Embedded System Design, ELEC001: Elective Course I, ELEC002: Elective Course II, ELEC003: Elective Course III, ELEC004: Elective Course IV, ELEC005: Elective Course V, IE342: Decision Theory, IE361: Game Theory\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Software Engineering (77 courses): CE223: Database Systems, CE304: Operating Systems Security, CE340: Cryptography and Network Security, CE345: Introduction to Machine Learning, CE350: Linux Utilities and Shell Scripting, CE360: Wireless Communications, CE395: Special Topics in Machine Learning, CE405: Programming for Bioinformatics, CE407: Introduction to Cloud Computing, CE450: Distributed Systems and Parallel Computing\n- Computer Engineering (16 courses): CE344: Advanced Machine Learning, CEST400: Engineering Summer Training (4 weeks), EEE461: Embedded System Design, ELEC001: Elective Course I, ELEC002: Elective Course II, ELEC003: Elective Course III, ELEC004: Elective Course IV, ELEC005: Elective Course V, IE342: Decision Theory, IE361: Game Theory\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Compare signal processing course coverage between Electrical and Electronics Engineering and Computer Engineering",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Electrical and Electronics Engineering (6 ders): EEE309: Signals and Systems, EEE406: Principles of Biomedical Engineering, EEE413: Digital Signal Processing, EEE416: Radar, Sonar and Sismic Signal Processing, EEE432: Measurement and Instrumentation, EEE456: Signal Processing Applications Using MATLAB\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Electrical and Electronics Engineering (6 courses): EEE309: Signals and Systems, EEE406: Principles of Biomedical Engineering, EEE413: Digital Signal Processing, EEE416: Radar, Sonar and Sismic Signal Processing, EEE432: Measurement and Instrumentation, EEE456: Signal Processing Applications Using MATLAB\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Compare optimization-related courses between Industrial Engineering and Software Engineering",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Industrial Engineering (7 ders): IE213: Computational Thinking for Operations Research, IE251: Optimization I, IE252: Optimization II, IE321: Dynamic and Nonlinear Programming, IE357: Special Topics in Optimization, IE358: Heuristics in Optimization, IE359: Network Optimization\n- Software Engineering (2 ders): CE370: Distributed Database Systems, IE375: Financial Engineering\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Industrial Engineering (7 courses): IE213: Computational Thinking for Operations Research, IE251: Optimization I, IE252: Optimization II, IE321: Dynamic and Nonlinear Programming, IE357: Special Topics in Optimization, IE358: Heuristics in Optimization, IE359: Network Optimization\n- Software Engineering (2 courses): CE370: Distributed Database Systems, IE375: Financial Engineering\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which department offers more courses related to embedded systems: Electrical and Electronics Engineering or Computer Engineering?",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setindeki anahtar kelime eşleşmelerine göre **Electrical and Electronics Engineering** bölümünde ilgili ders sayısı daha fazladır.\n\nBölümlere göre eşleşen ders sayıları (örnekler):\n- Electrical and Electronics Engineering (3 ders): EEE322: Engineering Electromagnetics, EEE335: Application Development for Internet of Things Systems, EEE406: Principles of Biomedical Engineering\n- Computer Engineering (1 ders): EEE461: Embedded System Design\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on keyword matches in the dataset, **Electrical and Electronics Engineering** has more related courses.\n\nMatched course counts by department (with examples):\n- Electrical and Electronics Engineering (3 courses): EEE322: Engineering Electromagnetics, EEE335: Application Development for Internet of Things Systems, EEE406: Principles of Biomedical Engineering\n- Computer Engineering (1 courses): EEE461: Embedded System Design\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Compare database-related courses between Software Engineering and Computer Engineering",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Software Engineering (6 ders): CE223: Database Systems, CE370: Distributed Database Systems, CE405: Programming for Bioinformatics, SE306: Database Management Systems, SE360: Advances in Software Development, SE380: Mobile Application Development\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Software Engineering (6 courses): CE223: Database Systems, CE370: Distributed Database Systems, CE405: Programming for Bioinformatics, SE306: Database Management Systems, SE360: Advances in Software Development, SE380: Mobile Application Development\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Compare cybersecurity-related course offerings between Software Engineering and Computer Engineering",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Software Engineering (6 ders): CE304: Operating Systems Security, CE340: Cryptography and Network Security, CE407: Introduction to Cloud Computing, SE352: Network Programming in Computer Games, SE370: Programming Web Services, SE482: E-Business: Administration, Security and Marketing\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Software Engineering (6 courses): CE304: Operating Systems Security, CE340: Cryptography and Network Security, CE407: Introduction to Cloud Computing, SE352: Network Programming in Computer Games, SE370: Programming Web Services, SE482: E-Business: Administration, Security and Marketing\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which department appears to have a stronger focus on project-based courses: Software Engineering or Industrial Engineering?",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Software Engineering (18 ders): CE350: Linux Utilities and Shell Scripting, CE405: Programming for Bioinformatics, CE450: Distributed Systems and Parallel Computing, CE466: Computer Vision, CE477: Data Science, ENG210: Technical English for Engineers, FENG497: Multidisciplinary Engineering Projects, FENG498: Engineering Capstone, FR201: French Language III, IE372: Project Management\n- Industrial Engineering (3 ders): IE327: Special Topics in Production Management, IE358: Heuristics in Optimization, IE359: Network Optimization\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Software Engineering (18 courses): CE350: Linux Utilities and Shell Scripting, CE405: Programming for Bioinformatics, CE450: Distributed Systems and Parallel Computing, CE466: Computer Vision, CE477: Data Science, ENG210: Technical English for Engineers, FENG497: Multidisciplinary Engineering Projects, FENG498: Engineering Capstone, FR201: French Language III, IE372: Project Management\n- Industrial Engineering (3 courses): IE327: Special Topics in Production Management, IE358: Heuristics in Optimization, IE359: Network Optimization\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Compare capstone/graduation project style courses across all engineering departments",
+      "category": "cross_department_comparison",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre bölümler bazında ilgili dersler (örnekler):\n- Software Engineering (18 ders): CE350: Linux Utilities and Shell Scripting, CE405: Programming for Bioinformatics, CE450: Distributed Systems and Parallel Computing, CE466: Computer Vision, CE477: Data Science, ENG210: Technical English for Engineers, FENG497: Multidisciplinary Engineering Projects, FENG498: Engineering Capstone, FR201: French Language III, IE372: Project Management\n- Industrial Engineering (3 ders): IE327: Special Topics in Production Management, IE358: Heuristics in Optimization, IE359: Network Optimization\n- Computer Engineering (2 ders): MCE420: Automation and Industry 4.0, SE302: Principles of Software Engineering\n- Electrical and Electronics Engineering (1 ders): EEE435: Communication Electronics\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, related courses by department (examples):\n- Software Engineering (18 courses): CE350: Linux Utilities and Shell Scripting, CE405: Programming for Bioinformatics, CE450: Distributed Systems and Parallel Computing, CE466: Computer Vision, CE477: Data Science, ENG210: Technical English for Engineers, FENG497: Multidisciplinary Engineering Projects, FENG498: Engineering Capstone, FR201: French Language III, IE372: Project Management\n- Industrial Engineering (3 courses): IE327: Special Topics in Production Management, IE358: Heuristics in Optimization, IE359: Network Optimization\n- Computer Engineering (2 courses): MCE420: Automation and Industry 4.0, SE302: Principles of Software Engineering\n- Electrical and Electronics Engineering (1 courses): EEE435: Communication Electronics\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many elective courses are offered in the final year of Software Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre Software Engineering bölümünde 4. sınıfta **6** adet seçmeli ders kontenjanı (ELEC/POOL slotu) bulunmaktadır:\n- ELEC002 (Fall)\n- ELEC003 (Fall)\n- ELEC004 (Fall)\n- ELEC005 (Spring)\n- ELEC006 (Spring)\n- ELEC007 (Spring)\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, there are **6** elective slots (ELEC/POOL) in Year 4 in Software Engineering:\n- ELEC002 (Fall)\n- ELEC003 (Fall)\n- ELEC004 (Fall)\n- ELEC005 (Spring)\n- ELEC006 (Spring)\n- ELEC007 (Spring)\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many elective courses are offered in the final year of Computer Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre Computer Engineering bölümünde 4. sınıfta **5** adet seçmeli ders kontenjanı (ELEC/POOL slotu) bulunmaktadır:\n- ELEC001 (Fall)\n- ELEC002 (Fall)\n- ELEC003 (Fall)\n- ELEC004 (Spring)\n- ELEC005 (Spring)\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, there are **5** elective slots (ELEC/POOL) in Year 4 in Computer Engineering:\n- ELEC001 (Fall)\n- ELEC002 (Fall)\n- ELEC003 (Fall)\n- ELEC004 (Spring)\n- ELEC005 (Spring)\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many elective courses are offered in the final year of Electrical and Electronics Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre Electrical and Electronics Engineering bölümünde 4. sınıfta **5** adet seçmeli ders kontenjanı (ELEC/POOL slotu) bulunmaktadır:\n- ELEC001 (Fall)\n- ELEC002 (Fall)\n- ELEC003 (Spring)\n- ELEC004 (Spring)\n- ELEC005 (Spring)\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, there are **5** elective slots (ELEC/POOL) in Year 4 in Electrical and Electronics Engineering:\n- ELEC001 (Fall)\n- ELEC002 (Fall)\n- ELEC003 (Spring)\n- ELEC004 (Spring)\n- ELEC005 (Spring)\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many elective courses are offered in the final year of Industrial Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre Industrial Engineering bölümünde 4. sınıfta **6** adet seçmeli ders kontenjanı (ELEC/POOL slotu) bulunmaktadır:\n- ELEC001 (Fall)\n- ELEC002 (Fall)\n- ELEC003 (Spring)\n- ELEC004 (Spring)\n- ELEC005 (Spring)\n- ELEC006 (Spring)\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset, there are **6** elective slots (ELEC/POOL) in Year 4 in Industrial Engineering:\n- ELEC001 (Fall)\n- ELEC002 (Fall)\n- ELEC003 (Spring)\n- ELEC004 (Spring)\n- ELEC005 (Spring)\n- ELEC006 (Spring)\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Which academic year has the highest total ECTS load?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setine göre (zorunlu derslerin ECTS toplamı baz alınarak) en yüksek ECTS yükü **3. sınıf**tadır.\n\nYıllara göre toplam ECTS (zorunlu dersler):\n- 1. sınıf: 72 ECTS\n- 2. sınıf: 147 ECTS\n- 3. sınıf: 165 ECTS\n- 4. sınıf: 32 ECTS\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBased on the dataset (summing ECTS of mandatory courses), the highest ECTS load is in **Year 3**.\n\nTotal ECTS by year (mandatory courses):\n- Year 1: 72 ECTS\n- Year 2: 147 ECTS\n- Year 3: 165 ECTS\n- Year 4: 32 ECTS\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many mandatory courses are offered in the second year of Software Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nSoftware Engineering bölümünde 2. sınıfta (veri setine göre) zorunlu dersler:\n- CE215: Discrete Mathematics for Computer Science\n- CE221: Data Structures and Algorithms I\n- CE223: Database Systems\n- ENG210: Technical English for Engineers\n- GBE251: Introduction to Biology for Non-majors\n- HIST100: Principles of Atatürk and History of Revolution\n- MATH240: Probability for Engineers\n- SE209: Concepts of Software Engineering\n- SE216: Software Project Management\n- SE226: Advanced Programming\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nMandatory courses in Software Engineering in Year 2 (based on the dataset):\n- CE215: Discrete Mathematics for Computer Science\n- CE221: Data Structures and Algorithms I\n- CE223: Database Systems\n- ENG210: Technical English for Engineers\n- GBE251: Introduction to Biology for Non-majors\n- HIST100: Principles of Atatürk and History of Revolution\n- MATH240: Probability for Engineers\n- SE209: Concepts of Software Engineering\n- SE216: Software Project Management\n- SE226: Advanced Programming\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many mandatory courses are offered in the third year of Computer Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nComputer Engineering bölümünde 3. sınıfta (veri setine göre) zorunlu dersler:\n- CE316: Programming Paradigms\n- CE323: Operating System Concepts\n- SE302: Principles of Software Engineering\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nMandatory courses in Computer Engineering in Year 3 (based on the dataset):\n- CE316: Programming Paradigms\n- CE323: Operating System Concepts\n- SE302: Principles of Software Engineering\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many courses (mandatory + elective) exist in the dataset for Software Engineering?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nSoftware Engineering bölümünde (veri setine göre) zorunlu dersler:\n- CE215: Discrete Mathematics for Computer Science\n- CE221: Data Structures and Algorithms I\n- CE223: Database Systems\n- ENG101: Academic Skills in English I\n- ENG102: Academic Skills in English II\n- ENG210: Technical English for Engineers\n- FENG101: Fundamentals of Engineering Culture\n- FENG102: Introduction to Engineering\n- FENG345: Numerical Methods for Engineers I\n- FENG497: Multidisciplinary Engineering Projects\n- FENG498: Engineering Capstone\n- GBE251: Introduction to Biology for Non-majors\n- HIST100: Principles of Atatürk and History of Revolution\n- IUE100: Orientation and Career Planning\n- MATH153: Calculus I\n- MATH154: Calculus II\n- MATH236: Engineering Statistics\n- MATH240: Probability for Engineers\n- MATH250: Linear Algebra for Engineers\n- PHYS100: General Physics I\n- PHYS102: General Physics II\n- SE115: Introduction to Programming I\n- SE116: Introduction to Programming II\n- SE209: Concepts of Software Engineering\n- SE216: Software Project Management\n- SE226: Advanced Programming\n- SE311: Software Architecture\n- SE321: Software Specification and Design\n- SE322: Software Verification and Validation\n- SE323: Concepts of Programming Languages\n- SE375: System Programming\n- SEST400: Engineering Summer Training (4 weeks)\n- TURK100: Turkish\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nMandatory courses in Software Engineering (based on the dataset):\n- CE215: Discrete Mathematics for Computer Science\n- CE221: Data Structures and Algorithms I\n- CE223: Database Systems\n- ENG101: Academic Skills in English I\n- ENG102: Academic Skills in English II\n- ENG210: Technical English for Engineers\n- FENG101: Fundamentals of Engineering Culture\n- FENG102: Introduction to Engineering\n- FENG345: Numerical Methods for Engineers I\n- FENG497: Multidisciplinary Engineering Projects\n- FENG498: Engineering Capstone\n- GBE251: Introduction to Biology for Non-majors\n- HIST100: Principles of Atatürk and History of Revolution\n- IUE100: Orientation and Career Planning\n- MATH153: Calculus I\n- MATH154: Calculus II\n- MATH236: Engineering Statistics\n- MATH240: Probability for Engineers\n- MATH250: Linear Algebra for Engineers\n- PHYS100: General Physics I\n- PHYS102: General Physics II\n- SE115: Introduction to Programming I\n- SE116: Introduction to Programming II\n- SE209: Concepts of Software Engineering\n- SE216: Software Project Management\n- SE226: Advanced Programming\n- SE311: Software Architecture\n- SE321: Software Specification and Design\n- SE322: Software Verification and Validation\n- SE323: Concepts of Programming Languages\n- SE375: System Programming\n- SEST400: Engineering Summer Training (4 weeks)\n- TURK100: Turkish\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many courses in the dataset are labeled as Elective across all departments?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setinde **Elective** olarak etiketlenmiş toplam **146** ders bulunmaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThere are **146** courses labeled as **Elective** in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "How many distinct course codes are present in the dataset across all departments?",
+      "category": "quantitative",
+      "expected_answer": "Manually verify against official curriculum data.",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nVeri setinde toplam **263** farklı ders kodu bulunmaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThere are **263** distinct course codes in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": null,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": null,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": false,
+      "trap_passed": null
+    },
+    {
+      "question": "Does the Software Engineering department offer a course on Quantum Thermodynamics?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a compulsory course on Astrophysics in Computer Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Electrical and Electronics Engineering offer a course on Ancient Greek Philosophy?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Medieval Literature in Industrial Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Software Engineering offer a course titled 'Dragon Engineering'?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 10,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 0.07142857142857142,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 10,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Marine Biology in Computer Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a mandatory course on Zoology in Electrical and Electronics Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a mandatory course on Archaeology in Industrial Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Software Engineering offer a course on Quantum Field Theory?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 10,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 0.14285714285714285,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 10,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Computer Engineering offer a course on Black Hole Thermodynamics?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Renaissance Art History in Electrical and Electronics Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır. \n\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır. \n\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 10,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 0.07142857142857142,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 10,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Astrobiology in Industrial Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a mandatory course on Meteorology in Software Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a compulsory course on Botany in Computer Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Electrical and Electronics Engineering offer a course on Mythology Studies?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 10,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 0.07142857142857142,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 10,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Culinary Arts in Industrial Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nCulinary Arts coursunun Industrial Engineering departmentünde bulunmamaktadır.\nBu ders için istenen bilgi veri setinde bulunmamaktadır\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThere is no course on Culinary Arts in Industrial Engineering. \nThe requested information for this course is not available in the dataset\n------------------------------------------------------------",
+      "retrieved_chunks_count": 10,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 0.2857142857142857,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 10,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Software Engineering offer a course on Veterinary Medicine?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Oceanography in Computer Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Is there a course on Paleontology in Electrical and Electronics Engineering?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    },
+    {
+      "question": "Does Industrial Engineering offer a course on Space Archaeology?",
+      "category": "trap",
+      "expected_answer": "No",
+      "actual_answer": "------------------------------------------------------------\nANSWER (TR)\n------------------------------------------------------------\nBu ders için istenen bilgi veri setinde bulunmamaktadır.\n------------------------------------------------------------\nANSWER (EN)\n------------------------------------------------------------\nThe requested information for this course is not available in the dataset.\n------------------------------------------------------------",
+      "retrieved_chunks_count": 1,
+      "metrics": {
+        "retrieval_accuracy": 0.0,
+        "groundedness": 1.0,
+        "is_hallucination": false,
+        "accuracy": 0.0,
+        "num_retrieved_chunks": 1,
+        "tr_en_format": {
+          "has_tr_section": true,
+          "has_en_section": true,
+          "has_separators": true,
+          "has_tr_content": true,
+          "has_en_content": true,
+          "format_compliant": true
+        }
+      },
+      "is_trap": true,
+      "trap_passed": true
+    }
+  ],
+  "aggregate_metrics": {
+    "average_retrieval_accuracy": 0.0,
+    "average_groundedness": 0.8412826424607783,
+    "average_accuracy": 0.0,
+    "retrieval_accuracy_n": 20,
+    "groundedness_n": 60,
+    "accuracy_n": 20,
+    "hallucination_rate": 0.0,
+    "total_hallucinations": 0,
+    "tr_en_compliance_rate": 1.0,
+    "total_tr_en_compliant": 60,
+    "category_distribution": {
+      "single_department": 10,
+      "topic_based": 10,
+      "cross_department_comparison": 10,
+      "quantitative": 10,
+      "trap": 20
+    }
+  }
+}

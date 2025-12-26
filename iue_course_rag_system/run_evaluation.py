@@ -65,7 +65,8 @@ def main():
         vector_db=vector_db,
         embedder=embedder,
         llm_provider=args.llm_provider,
-        model_name=args.model_name
+        model_name=args.model_name,
+        data_dir=args.data_dir
     )
     
     # Initialize evaluator
@@ -85,9 +86,24 @@ def main():
     print(f"Total Questions: {results.get('total_questions', 0)}")
     
     aggregate = results.get('aggregate_metrics', {})
-    print(f"\nAverage Retrieval Accuracy: {aggregate.get('average_retrieval_accuracy', 0):.2%}")
-    print(f"Average Groundedness: {aggregate.get('average_groundedness', 0):.2%}")
-    print(f"Average Accuracy: {aggregate.get('average_accuracy', 0):.2%}")
+    ra_n = aggregate.get('retrieval_accuracy_n', 0)
+    g_n = aggregate.get('groundedness_n', 0)
+    acc_n = aggregate.get('accuracy_n', 0)
+
+    if ra_n:
+        print(f"\nAverage Retrieval Accuracy: {aggregate.get('average_retrieval_accuracy', 0):.2%} (n={ra_n})")
+    else:
+        print("\nAverage Retrieval Accuracy: N/A (no ground-truth answers provided)")
+
+    if g_n:
+        print(f"Average Groundedness: {aggregate.get('average_groundedness', 0):.2%} (n={g_n})")
+    else:
+        print("Average Groundedness: N/A")
+
+    if acc_n:
+        print(f"Average Accuracy: {aggregate.get('average_accuracy', 0):.2%} (n={acc_n})")
+    else:
+        print("Average Accuracy: N/A (no ground-truth answers provided)")
     print(f"Hallucination Rate: {aggregate.get('hallucination_rate', 0):.2%}")
     print(f"Total Hallucinations: {aggregate.get('total_hallucinations', 0)}")
     print(f"TR+EN Format Compliance: {aggregate.get('tr_en_compliance_rate', 0):.2%}")

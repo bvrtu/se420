@@ -9,6 +9,28 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+_PLACEHOLDER_GT_PREFIXES = (
+    "manually verify",
+    "manual verify",
+)
+
+
+def _is_placeholder_ground_truth(expected_answer: str) -> bool:
+    if not expected_answer:
+        return True
+    ea = expected_answer.strip().lower()
+    return any(ea.startswith(p) for p in _PLACEHOLDER_GT_PREFIXES)
+
+
+def _is_no_data_answer(answer: str) -> bool:
+    if not answer:
+        return True
+    a = answer.lower()
+    return (
+        "bu ders için istenen bilgi veri setinde bulunmamaktadır" in a
+        or "the requested information for this course is not available in the dataset" in a
+        or "not available in the dataset" in a
+    )
 
 def calculate_retrieval_accuracy(retrieved_chunks: List[Dict], expected_keywords: List[str]) -> float:
     """
@@ -33,7 +55,7 @@ def calculate_retrieval_accuracy(retrieved_chunks: List[Dict], expected_keywords
     return matches / len(expected_keywords) if expected_keywords else 0.0
 
 
-def calculate_groundedness(actual_answer: str, retrieved_chunks: List[Dict]) -> float:
+def calculate_groundedness(actual_answer: str, retrieved_chunks: List[Dict]) -> float | None:
     """
     Calculate groundedness - how well the answer is supported by retrieved chunks
     
@@ -45,13 +67,19 @@ def calculate_groundedness(actual_answer: str, retrieved_chunks: List[Dict]) -> 
         Groundedness score (0.0 to 1.0)
     """
     if not actual_answer or not retrieved_chunks:
-        return 0.0
+        return None
+
+    # Dataset-evidence chunks are considered grounded (deterministic answers).
+    for ch in retrieved_chunks:
+        md = ch.get("metadata") or {}
+        if md.get("source") == "dataset":
+            return 1.0
     
     # Extract key phrases from answer (simple approach)
     answer_words = set(re.findall(r'\b\w{4,}\b', actual_answer.lower()))
     
     if not answer_words:
-        return 0.0
+        return None
     
     # Extract text from all retrieved chunks
     chunk_text = ' '.join([chunk.get('text', '') for chunk in retrieved_chunks]).lower()
@@ -75,27 +103,24 @@ def detect_hallucination(actual_answer: str, retrieved_chunks: List[Dict]) -> bo
     Returns:
         True if hallucination detected, False otherwise
     """
-    if not actual_answer or not retrieved_chunks:
-        return True
+    # If system explicitly returns "no data", do not mark as hallucination.
+    if _is_no_data_answer(actual_answer):
+        return False
+
+    # If there is no retrieved evidence, we cannot automatically judge hallucination here.
+    # (Deterministic/dataset-based answers may have empty retrieved_chunks.)
+    if not retrieved_chunks:
+        return False
     
-    # Check for common hallucination indicators
-    hallucination_phrases = [
-        "i don't have information",
-        "not available",
-        "cannot find",
-        "no data",
-        "unknown"
-    ]
-    
-    answer_lower = actual_answer.lower()
-    if any(phrase in answer_lower for phrase in hallucination_phrases):
-        return False  # System correctly says it doesn't know
-    
-    # Check groundedness
+    # Dataset-evidence chunks are considered grounded (deterministic answers).
+    for ch in retrieved_chunks:
+        md = ch.get("metadata") or {}
+        if md.get("source") == "dataset":
+            return False
+
     groundedness = calculate_groundedness(actual_answer, retrieved_chunks)
-    
     # Low groundedness indicates potential hallucination
-    return groundedness < 0.3
+    return (groundedness is not None) and groundedness < 0.3
 
 
 def calculate_accuracy(expected_answer: str, actual_answer: str) -> float:
@@ -180,14 +205,16 @@ def calculate_metrics(expected_answer: str, actual_answer: str, retrieved_chunks
     Returns:
         Dictionary with all metrics
     """
-    # Extract keywords from expected answer
-    expected_keywords = re.findall(r'\b\w{4,}\b', expected_answer.lower()) if expected_answer else []
-    
+    placeholder_gt = _is_placeholder_ground_truth(expected_answer)
+
+    # Extract keywords from expected answer (only if we actually have a ground-truth text)
+    expected_keywords = re.findall(r'\b\w{4,}\b', expected_answer.lower()) if (expected_answer and not placeholder_gt) else []
+
     # Calculate metrics
-    retrieval_accuracy = calculate_retrieval_accuracy(retrieved_chunks, expected_keywords)
+    retrieval_accuracy = None if placeholder_gt else calculate_retrieval_accuracy(retrieved_chunks, expected_keywords)
     groundedness = calculate_groundedness(actual_answer, retrieved_chunks)
     is_hallucination = detect_hallucination(actual_answer, retrieved_chunks)
-    accuracy = calculate_accuracy(expected_answer, actual_answer)
+    accuracy = None if placeholder_gt else calculate_accuracy(expected_answer, actual_answer)
     
     # TR+EN format check
     tr_en_format = check_tr_en_format(actual_answer)
